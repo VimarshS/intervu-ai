@@ -76,3 +76,47 @@ Always paste the relevant section when starting a new Claude session.
 - User onboarding multi-step form
 - Profile setup (target role, company, experience level)
 - Dashboard layout with sidebar and navbar
+
+## Day 3 — Onboarding + Dashboard Layout + Profile
+**Date:** 2025-05-24
+
+### Built
+- Dashboard layout shell with sidebar and navbar
+- Sidebar with active route highlighting
+- Navbar with user avatar dropdown and sign out
+- 3-step onboarding wizard (role, company, experience level)
+- Profile settings page with form pre-population
+- Real dashboard home with stats and recent sessions
+- Session history page with score breakdowns
+- Placeholder pages for interview, practice, resume routes
+
+### Key Decisions
+- Zod v4 uses `error` not `required_error` + `as const` for enum arrays
+- Dashboard layout handles onboarding redirect — not individual pages
+- Onboarding lives outside (dashboard) group to avoid redirect loop
+- History page joins feedback_reports in single Supabase query
+- All dashboard pages are Server Components except profile (needs form state)
+
+### Tests Passed
+- Sidebar navigation loads all pages without 404 ✅
+- Onboarding saves profile and redirects to dashboard ✅
+- Profile page pre-populates with existing data ✅
+- Profile update saves and shows success toast ✅
+- New user redirected to onboarding before dashboard access ✅
+
+### Files Created
+- components/layout/Sidebar.tsx
+- components/layout/Navbar.tsx
+- app/(dashboard)/layout.tsx (replaced)
+- app/onboarding/page.tsx
+- app/(dashboard)/profile/page.tsx
+- app/(dashboard)/dashboard/page.tsx (replaced)
+- app/(dashboard)/history/page.tsx
+- app/(dashboard)/interview/page.tsx (placeholder)
+- app/(dashboard)/practice/page.tsx (placeholder)
+- app/(dashboard)/resume/page.tsx (placeholder)
+
+### Ready for Day 4
+- AI interview engine (Gemini integration)
+- Interview session API routes
+- Prompt engineering for mock interviewer
