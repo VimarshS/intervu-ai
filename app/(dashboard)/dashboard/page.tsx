@@ -13,12 +13,17 @@ import {
   MessageSquare,
   Code2,
   FileText,
-  Trophy,
   ArrowRight,
   Target,
   Briefcase,
+  Trophy,
+  Flame,
+  TrendingUp,
 } from "lucide-react";
 import Link from "next/link";
+import { StatsCard } from "@/components/dashboard/StatsCard";
+import { SessionCard } from "@/components/dashboard/SessionCard";
+import { ProgressChartWrapper } from "@/components/dashboard/ProgressChartWrapper";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -37,10 +42,20 @@ export default async function DashboardPage() {
     .eq("id", user.id)
     .single();
 
-  // Fetch session stats
+  // Fetch recent sessions with feedback
   const { data: sessions } = await supabase
     .from("interview_sessions")
-    .select("id, status, total_score, interview_type, created_at")
+    .select(
+      `
+      id,
+      interview_type,
+      company,
+      status,
+      total_score,
+      duration_seconds,
+      created_at
+    `
+    )
     .eq("user_id", user.id)
     .order("created_at", { ascending: false })
     .limit(5);
@@ -51,9 +66,16 @@ export default async function DashboardPage() {
   const averageScore =
     completedSessions.length > 0
       ? Math.round(
-          completedSessions.reduce((sum, s) => sum + (s.total_score ?? 0), 0) /
-            completedSessions.length
+          completedSessions.reduce(
+            (sum, s) => sum + (s.total_score ?? 0),
+            0
+          ) / completedSessions.length
         )
+      : null;
+
+  const bestScore =
+    completedSessions.length > 0
+      ? Math.max(...completedSessions.map((s) => s.total_score ?? 0))
       : null;
 
   const quickActions = [
@@ -99,8 +121,6 @@ export default async function DashboardPage() {
             Ready to ace your next interview? Let&apos;s practice.
           </p>
         </div>
-
-        {/* Profile summary badges */}
         <div className="hidden sm:flex flex-col items-end gap-1.5">
           {profile?.target_role && (
             <Badge variant="secondary" className="text-xs gap-1">
@@ -118,61 +138,39 @@ export default async function DashboardPage() {
       </div>
 
       {/* Stats Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">
-                  Total Sessions
-                </p>
-                <p className="text-3xl font-bold mt-1">
-                  {sessions?.length ?? 0}
-                </p>
-              </div>
-              <div className="h-10 w-10 rounded-full bg-blue-500/10 flex items-center justify-center">
-                <MessageSquare className="h-5 w-5 text-blue-500" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">
-                  Completed
-                </p>
-                <p className="text-3xl font-bold mt-1">
-                  {completedSessions.length}
-                </p>
-              </div>
-              <div className="h-10 w-10 rounded-full bg-green-500/10 flex items-center justify-center">
-                <Trophy className="h-5 w-5 text-green-500" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">
-                  Average Score
-                </p>
-                <p className="text-3xl font-bold mt-1">
-                  {averageScore !== null ? `${averageScore}/10` : "—"}
-                </p>
-              </div>
-              <div className="h-10 w-10 rounded-full bg-orange-500/10 flex items-center justify-center">
-                <Target className="h-5 w-5 text-orange-500" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <StatsCard
+          label="Total Sessions"
+          value={sessions?.length ?? 0}
+          icon={MessageSquare}
+          iconColor="text-blue-500"
+          iconBg="bg-blue-500/10"
+        />
+        <StatsCard
+          label="Completed"
+          value={completedSessions.length}
+          icon={Trophy}
+          iconColor="text-yellow-500"
+          iconBg="bg-yellow-500/10"
+        />
+        <StatsCard
+          label="Average Score"
+          value={averageScore !== null ? `${averageScore}/10` : "—"}
+          icon={TrendingUp}
+          iconColor="text-green-500"
+          iconBg="bg-green-500/10"
+        />
+        <StatsCard
+          label="Best Score"
+          value={bestScore !== null ? `${bestScore}/10` : "—"}
+          icon={Flame}
+          iconColor="text-orange-500"
+          iconBg="bg-orange-500/10"
+        />
       </div>
+
+      {/* Progress Chart — client component wrapper */}
+      <ProgressChartWrapper />
 
       {/* Quick Actions */}
       <div>
@@ -232,49 +230,16 @@ export default async function DashboardPage() {
         {sessions && sessions.length > 0 ? (
           <div className="space-y-2">
             {sessions.map((session) => (
-              <Card key={session.id}>
-                <CardContent className="py-4 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center">
-                      <MessageSquare className="h-4 w-4 text-muted-foreground" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium capitalize">
-                        {session.interview_type.replace("_", " ")} Interview
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {new Date(session.created_at).toLocaleDateString(
-                          "en-IN",
-                          {
-                            day: "numeric",
-                            month: "short",
-                            year: "numeric",
-                          }
-                        )}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {session.total_score !== null && (
-                      <Badge variant="secondary">
-                        {session.total_score}/10
-                      </Badge>
-                    )}
-                    <Badge
-                      variant={
-                        session.status === "completed"
-                          ? "default"
-                          : session.status === "in_progress"
-                          ? "secondary"
-                          : "outline"
-                      }
-                      className="capitalize text-xs"
-                    >
-                      {session.status.replace("_", " ")}
-                    </Badge>
-                  </div>
-                </CardContent>
-              </Card>
+              <SessionCard
+                key={session.id}
+                id={session.id}
+                interviewType={session.interview_type}
+                company={session.company}
+                status={session.status}
+                score={session.total_score}
+                duration={session.duration_seconds}
+                createdAt={session.created_at}
+              />
             ))}
           </div>
         ) : (
@@ -286,7 +251,8 @@ export default async function DashboardPage() {
               <div>
                 <p className="font-medium">No sessions yet</p>
                 <p className="text-sm text-muted-foreground">
-                  Start your first mock interview to see your progress here
+                  Start your first mock interview to see your
+                  progress here
                 </p>
               </div>
               <Button asChild size="sm">

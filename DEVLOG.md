@@ -165,3 +165,41 @@ Always paste the relevant section when starting a new Claude session.
 - useInterview hook
 - Session detail/review page
 - Improve feedback report UI
+
+## Day 5 — State Management + Session Review
+**Date:** 2025-XX-XX
+
+### Built
+- Zustand interview store with full session state
+- useInterview hook encapsulating all API calls and timer
+- Interview page refactored to use hook (purely presentational)
+- Session review page with transcript and feedback
+- Custom not-found page for invalid session URLs
+
+### Key Decisions
+- Neutral MessageHistory format in store — not provider specific
+- useCallback on all hook actions for stable references
+- sendMessage clears input only on success — preserves typed answer on error
+- params typed as Promise in Next.js 16 dynamic routes
+- notFound() used for both missing and unauthorized sessions (same 404)
+- feedback section conditionally rendered — handles abandoned sessions
+
+### Tests Passed
+- Full interview loop works with hook refactor ✅
+- History page Review button navigates to session review ✅
+- Session review shows transcript and scores ✅
+- Invalid session URL shows custom 404 ✅
+- Reset clears store and shows setup form ✅
+
+### Files Created
+- store/interviewStore.ts
+- hooks/useInterview.ts
+- app/(dashboard)/interview/page.tsx (refactored)
+- app/(dashboard)/interview/[sessionId]/page.tsx
+- app/(dashboard)/interview/[sessionId]/not-found.tsx
+
+### Ready for Day 6
+- AI feedback report improvements
+- Progress tracking with charts
+- Skill radar visualization
+- Dashboard stats improvements
