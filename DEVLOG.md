@@ -120,3 +120,48 @@ Always paste the relevant section when starting a new Claude session.
 - AI interview engine (Gemini integration)
 - Interview session API routes
 - Prompt engineering for mock interviewer
+
+## Day 4 — AI Interview Engine
+**Date:** 2025-05-25
+
+### Built
+- Gemini 1.5 Flash client with chat history support
+- Groq fallback client (Llama 3)
+- AI router with automatic fallback logic
+- Interviewer system prompt builder (5 interview types)
+- Feedback prompt builder with JSON output
+- Interview start API route
+- Interview respond API route
+- Interview end API route with feedback generation
+- Full interview UI with setup, chat, and feedback screens
+
+### Key Decisions
+- Gemini uses user/model exchange for system prompt injection
+- Neutral MessageHistory format translated per provider in router
+- Frontend maintains conversation history in state — not fetched per message
+- System prompt stored in frontend state — returned from start route
+- Feedback JSON cleaned of markdown fences before parsing
+- InterviewState machine drives UI screen transitions
+
+### Tests Passed
+- Interview starts and AI sends opening question ✅
+- Multi-turn conversation works correctly ✅
+- Feedback report generated and displayed ✅
+- All data saved to Supabase tables ✅
+
+### Files Created
+- lib/ai/gemini.ts
+- lib/ai/groq.ts
+- lib/ai/router.ts
+- lib/ai/prompts/interviewer.ts
+- lib/ai/prompts/feedback.ts
+- app/api/interview/start/route.ts
+- app/api/interview/respond/route.ts
+- app/api/interview/end/route.ts
+- app/(dashboard)/interview/page.tsx (replaced)
+
+### Ready for Day 5
+- Zustand interview session store
+- useInterview hook
+- Session detail/review page
+- Improve feedback report UI

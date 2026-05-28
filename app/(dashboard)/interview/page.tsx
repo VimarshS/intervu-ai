@@ -4,7 +4,6 @@ import { useState, useRef, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -32,6 +31,7 @@ import {
   User,
   Clock,
 } from "lucide-react";
+import { useInterview } from "@/hooks/useInterview";
 import type { InterviewType, ExperienceLevel } from "@/types/database";
 
 const setupSchema = z.object({
@@ -54,34 +54,22 @@ const setupSchema = z.object({
 
 type SetupFormData = z.infer<typeof setupSchema>;
 
-type Message = {
-  role: "user" | "assistant";
-  content: string;
-};
-
-type InterviewState = "setup" | "active" | "ending" | "feedback";
-
-interface FeedbackReport {
-  overall_score: number;
-  technical_score: number;
-  communication_score: number;
-  problem_solving_score: number;
-  strengths: string[];
-  improvements: string[];
-  detailed_feedback: string;
-}
-
 export default function InterviewPage() {
-  const [state, setState] = useState<InterviewState>("setup");
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [sessionId, setSessionId] = useState<string | null>(null);
-  const [systemPrompt, setSystemPrompt] = useState<string>("");
   const [userInput, setUserInput] = useState("");
-  const [isAiTyping, setIsAiTyping] = useState(false);
-  const [feedback, setFeedback] = useState<FeedbackReport | null>(null);
-  const [startTime, setStartTime] = useState<Date | null>(null);
-  const [elapsed, setElapsed] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const {
+    interviewState,
+    messages,
+    feedback,
+    isAiTyping,
+    elapsed,
+    formatTime,
+    startInterview,
+    sendMessage,
+    endInterview,
+    resetInterview,
+  } = useInterview();
 
   const {
     register,
@@ -104,117 +92,19 @@ export default function InterviewPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isAiTyping]);
 
-  // Timer
-  useEffect(() => {
-    if (state !== "active" || !startTime) return;
-    const interval = setInterval(() => {
-      setElapsed(Math.floor((Date.now() - startTime.getTime()) / 1000));
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [state, startTime]);
-
-  function formatTime(seconds: number): string {
-    const m = Math.floor(seconds / 60)
-      .toString()
-      .padStart(2, "0");
-    const s = (seconds % 60).toString().padStart(2, "0");
-    return `${m}:${s}`;
-  }
-
   async function onStartInterview(data: SetupFormData) {
-    try {
-      const response = await fetch("/api/interview/start", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        toast.error(result.error ?? "Failed to start interview");
-        return;
-      }
-
-      setSessionId(result.session_id);
-      setSystemPrompt(result.system_prompt);
-      setMessages([{ role: "assistant", content: result.message }]);
-      setStartTime(new Date());
-      setState("active");
-    } catch {
-      toast.error("Failed to connect. Please try again.");
-    }
+    await startInterview({
+      role: data.role,
+      company: data.company ?? null,
+      interview_type: data.interview_type as InterviewType,
+      experience_level: data.experience_level as ExperienceLevel,
+    });
   }
 
   async function onSendMessage() {
-    const trimmed = userInput.trim();
-    if (!trimmed || isAiTyping || !sessionId) return;
-
-    const newMessage: Message = { role: "user", content: trimmed };
-    const updatedMessages = [...messages, newMessage];
-
-    setMessages(updatedMessages);
-    setUserInput("");
-    setIsAiTyping(true);
-
-    try {
-      const response = await fetch("/api/interview/respond", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          session_id: sessionId,
-          user_message: trimmed,
-          system_prompt: systemPrompt,
-          history: messages, // Send history before new message
-        }),
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        toast.error(result.error ?? "Failed to get response");
-        return;
-      }
-
-      setMessages([
-        ...updatedMessages,
-        { role: "assistant", content: result.message },
-      ]);
-    } catch {
-      toast.error("Connection error. Please try again.");
-    } finally {
-      setIsAiTyping(false);
-    }
-  }
-
-  async function onEndInterview() {
-    if (!sessionId) return;
-    setState("ending");
-
-    try {
-      const response = await fetch("/api/interview/end", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          session_id: sessionId,
-          duration_seconds: elapsed,
-        }),
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        toast.error(result.error ?? "Failed to generate feedback");
-        setState("active");
-        return;
-      }
-
-      setFeedback(result.feedback);
-      setState("feedback");
-    } catch {
-      toast.error("Failed to end interview. Please try again.");
-      setState("active");
-    }
+    if (!userInput.trim()) return;
+    const success = await sendMessage(userInput);
+    if (success) setUserInput("");
   }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
@@ -225,7 +115,7 @@ export default function InterviewPage() {
   }
 
   // ── SETUP SCREEN ──────────────────────────────────────────
-  if (state === "setup") {
+  if (interviewState === "setup" || interviewState === "idle") {
     return (
       <div className="max-w-2xl mx-auto space-y-6">
         <div>
@@ -286,22 +176,15 @@ export default function InterviewPage() {
                 <Select
                   defaultValue="behavioral"
                   onValueChange={(value) =>
-                    setValue(
-                      "interview_type",
-                      value as InterviewType
-                    )
+                    setValue("interview_type", value as InterviewType)
                   }
                 >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="behavioral">
-                      Behavioral
-                    </SelectItem>
-                    <SelectItem value="technical">
-                      Technical
-                    </SelectItem>
+                    <SelectItem value="behavioral">Behavioral</SelectItem>
+                    <SelectItem value="technical">Technical</SelectItem>
                     <SelectItem value="coding">Coding</SelectItem>
                     <SelectItem value="system_design">
                       System Design
@@ -343,7 +226,7 @@ export default function InterviewPage() {
                 </Select>
               </div>
 
-              {/* Interview type description */}
+              {/* Type description hint */}
               <div className="rounded-lg bg-muted p-3 text-xs text-muted-foreground">
                 {watchedType === "behavioral" &&
                   "Questions about past experiences, teamwork, and soft skills using the STAR method."}
@@ -367,9 +250,7 @@ export default function InterviewPage() {
                 ) : (
                   <MessageSquare className="mr-2 h-4 w-4" />
                 )}
-                {isSubmitting
-                  ? "Preparing Interview..."
-                  : "Start Interview"}
+                {isSubmitting ? "Preparing Interview..." : "Start Interview"}
               </Button>
             </form>
           </CardContent>
@@ -379,7 +260,7 @@ export default function InterviewPage() {
   }
 
   // ── FEEDBACK SCREEN ───────────────────────────────────────
-  if (state === "feedback" && feedback) {
+  if (interviewState === "feedback" && feedback) {
     return (
       <div className="max-w-2xl mx-auto space-y-6">
         <div>
@@ -479,25 +360,14 @@ export default function InterviewPage() {
           </CardContent>
         </Card>
 
-        <Button
-          className="w-full"
-          onClick={() => {
-            setState("setup");
-            setMessages([]);
-            setSessionId(null);
-            setSystemPrompt("");
-            setFeedback(null);
-            setElapsed(0);
-            setStartTime(null);
-          }}
-        >
+        <Button className="w-full" onClick={resetInterview}>
           Start Another Interview
         </Button>
       </div>
     );
   }
 
-  // ── ACTIVE INTERVIEW SCREEN ───────────────────────────────
+  // ── ACTIVE + ENDING INTERVIEW SCREEN ─────────────────────
   return (
     <div className="flex flex-col h-[calc(100vh-8rem)]">
       {/* Interview Header */}
@@ -515,15 +385,17 @@ export default function InterviewPage() {
         <Button
           variant="destructive"
           size="sm"
-          onClick={onEndInterview}
-          disabled={state === "ending"}
+          onClick={endInterview}
+          disabled={interviewState === "ending"}
         >
-          {state === "ending" ? (
+          {interviewState === "ending" ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           ) : (
             <Square className="mr-2 h-4 w-4" />
           )}
-          {state === "ending" ? "Generating Feedback..." : "End Interview"}
+          {interviewState === "ending"
+            ? "Generating Feedback..."
+            : "End Interview"}
         </Button>
       </div>
 
@@ -584,14 +456,16 @@ export default function InterviewPage() {
             onChange={(e) => setUserInput(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Type your answer... (Enter to send)"
-            disabled={isAiTyping || state === "ending"}
+            disabled={isAiTyping || interviewState === "ending"}
             className="border-0 bg-transparent shadow-none focus-visible:ring-0 text-sm px-0"
           />
           <Button
             size="icon"
             onClick={onSendMessage}
             disabled={
-              !userInput.trim() || isAiTyping || state === "ending"
+              !userInput.trim() ||
+              isAiTyping ||
+              interviewState === "ending"
             }
             className="shrink-0 h-8 w-8 rounded-full"
           >
