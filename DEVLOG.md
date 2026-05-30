@@ -288,3 +288,120 @@ Always paste the relevant section when starting a new Claude session.
 - Error boundaries
 - Empty states polish
 - Toast notifications audit
+
+## Day 8 — Landing Page + Polish
+**Date:** 2025-05-29
+
+### Built
+- Landing page with hero, features, how it works, CTA sections
+- Global 404 not-found page
+- Root loading.tsx and dashboard loading.tsx
+- Error boundary component (functional, window error listener)
+- Dashboard skeleton components (stats, charts, sessions, profile, resume)
+- Mobile sidebar with hamburger menu and slide-in drawer
+- Dashboard layout mobile padding fix
+
+### Key Decisions
+- Error boundary as functional component — class component had TS conflicts
+- Two loading.tsx files — root for full page, dashboard for in-app navigation
+- NavLinks inner component avoids duplication between desktop and mobile
+- Mobile header lives in Sidebar component — not in layout
+- Navbar hidden on mobile — sidebar handles mobile header
+- p-4 mobile / p-6 desktop responsive padding in layout
+
+### Tests Passed
+- Landing page renders all sections correctly ✅
+- Custom 404 page shows for invalid routes ✅
+- Loading spinner shows during page navigation ✅
+- Mobile hamburger menu opens and closes correctly ✅
+- No TypeScript errors across all new files ✅
+
+### Files Created
+- app/page.tsx (replaced)
+- components/dashboard/DashboardSkeleton.tsx
+- components/ErrorBoundary.tsx
+- app/not-found.tsx
+- app/loading.tsx
+- app/(dashboard)/loading.tsx
+- components/layout/Sidebar.tsx (updated — mobile support)
+- app/(dashboard)/layout.tsx (updated — mobile fix)
+
+### Ready for Day 9
+- Coding practice module
+- Monaco editor setup
+- Piston API integration
+- AI coding problem generation
+
+## Day 9 — Coding Practice Module
+**Date:** 2025-05-30
+
+### Built
+- Piston API client replaced with Judge0 CE (piston deprecated Feb 2026)
+- Code execution API route (server-side proxy to Judge0)
+- Monaco Editor component with dynamic import (ssr: false)
+- OutputPanel with terminal-style display
+- Coding problem prompt builder (role + level aware)
+- Code review prompt builder (with actual output verification)
+- Coding practice page with AI problem generation
+- Two additional API routes: /api/coding/problem and /api/coding/review
+- Windows SSL fix: process.platform === "win32" check in execute route
+
+### Key Decisions
+- Monaco loaded with dynamic() + ssr:false — browser-only library
+- Judge0 CE public instance (ce.judge0.com) — no API key required
+- Gemini model updated to gemini-2.0-flash (gemini-1.5-flash returned 404)
+- AI calls moved to server-side API routes — never imported in client components
+- practice/page.tsx uses fetch to /api/coding/problem and /api/coding/review
+- PracticeState machine: setup → loading_problem → solving → running → reviewing → reviewed
+- NODE_TLS_REJECT_UNAUTHORIZED only set on win32 — safe for Vercel Linux deployment
+- Judge0 fallback to RapidAPI endpoint if JUDGE0_API_KEY env var is set
+- Hints revealed one at a time — not all at once
+- Submit disabled after review — must start new problem
+
+### Issues Encountered and Fixed
+- Piston emkc.org returned 401 — whitelist only since Feb 2026
+- Switched to Judge0 CE public instance
+- Windows SSL error (ERR_SSL_TLSV1_UNRECOGNIZED_NAME) with ce.judge0.com
+- Fixed with process.platform === "win32" SSL bypass in execute route
+- gemini-1.5-flash returned 404 — updated to gemini-2.0-flash
+- Gemini quota exceeded — Groq fallback (llama-3.3-70b-versatile) handles it
+- generateAIResponse imported directly in practice/page.tsx caused client-side crash
+- Fixed by moving AI calls to /api/coding/problem and /api/coding/review routes
+
+### Tests Passed
+- Problem generation works with language + topic context ✅
+- Code execution returns stdout and stderr correctly via Judge0 ✅
+- Hints reveal progressively ✅
+- AI review shows score, complexity, strengths, improvements ✅
+- New Problem resets all state cleanly ✅
+- Works on Windows locally and will work on Vercel Linux ✅
+
+### Files Created
+- lib/piston/client.ts (Judge0 CE implementation)
+- app/api/code/execute/route.ts
+- app/api/coding/problem/route.ts
+- app/api/coding/review/route.ts
+- components/coding/CodeEditor.tsx
+- components/coding/OutputPanel.tsx
+- lib/ai/prompts/coding.ts
+- app/(dashboard)/practice/page.tsx (replaced)
+
+### Current AI Models
+- Primary: gemini-2.0-flash (Gemini API)
+- Fallback: llama-3.3-70b-versatile (Groq)
+
+### Environment Variables Current State
+- NEXT_PUBLIC_SUPABASE_URL ✅
+- NEXT_PUBLIC_SUPABASE_ANON_KEY ✅
+- GEMINI_API_KEY ✅
+- GROQ_API_KEY ✅
+- NEXT_PUBLIC_SITE_URL ✅
+- JUDGE0_API_KEY (optional — fallback only)
+
+### Ready for Day 9 Enhancement
+- LeetCode-style execution environment
+- Helper classes pre-provided (ListNode, TreeNode)
+- Driver code handled internally
+- Users write function only
+- Changes: coding.ts prompt + piston client + practice page + coding problem route
+- Zero impact on interview module, resume, dashboard, auth
