@@ -245,3 +245,46 @@ Always paste the relevant section when starting a new Claude session.
 - PDF text extraction
 - Supabase Storage integration
 - Resume analysis API route
+
+## Day 7 — Resume Intelligence Module
+**Date:** 2025-05-28
+
+### Built
+- Supabase Storage bucket for resumes with RLS policies
+- Resume analysis AI prompt with ATS scoring
+- Resume analyze API route (upload + extraction + AI + save)
+- UploadZone component with drag-and-drop + PDF.js extraction
+- AnalysisCard component with scores, gaps, predicted questions
+- Resume page with upload, current analysis, and history
+- History page refactored to use SessionCard component
+
+### Key Decisions
+- PDF text extraction runs in browser via PDF.js dynamic import
+- Server receives clean text — no PDF processing server-side
+- PDF.js worker loaded from CDN matching installed version
+- File stored under userId/timestamp path matching RLS policy
+- extractedText sent alongside file in FormData
+- AnalysisCard CTA links to /interview to close the loop
+- expandedId pattern allows only one past analysis open at a time
+
+### Tests Passed
+- PDF upload and text extraction works ✅
+- AI analysis generates ATS score and predicted questions ✅
+- Analysis saved to Supabase and persists on refresh ✅
+- Past analyses expandable in history list ✅
+- History page renders with SessionCard correctly ✅
+
+### Files Created
+- lib/ai/prompts/resume.ts
+- app/api/resume/analyze/route.ts
+- components/resume/UploadZone.tsx
+- components/resume/AnalysisCard.tsx
+- app/(dashboard)/resume/page.tsx (replaced)
+- app/(dashboard)/history/page.tsx (updated)
+
+### Ready for Day 8
+- Landing page (app/page.tsx)
+- Loading skeletons
+- Error boundaries
+- Empty states polish
+- Toast notifications audit
