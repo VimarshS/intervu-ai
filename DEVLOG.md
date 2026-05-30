@@ -167,7 +167,7 @@ Always paste the relevant section when starting a new Claude session.
 - Improve feedback report UI
 
 ## Day 5 — State Management + Session Review
-**Date:** 2025-XX-XX
+**Date:** 2025-05-26
 
 ### Built
 - Zustand interview store with full session state
@@ -203,3 +203,45 @@ Always paste the relevant section when starting a new Claude session.
 - Progress tracking with charts
 - Skill radar visualization
 - Dashboard stats improvements
+
+## Day 6 — Progress Tracking + Charts
+**Date:** 2025-05-27
+
+### Built
+- useProgress hook with full stats computation
+- ProgressChart component (Recharts LineChart)
+- SkillRadar component (Recharts RadarChart)
+- StatsCard reusable component with trend indicator
+- SessionCard reusable component
+- ProgressChartWrapper client island for server dashboard
+- Dashboard page updated with all new components
+
+### Key Decisions
+- Supabase joined query typed with explicit RawSession interface
+- Double cast (as unknown as RawSession[]) bypasses Supabase inference
+- ProgressChartWrapper bridges Server Component + client hooks
+- Charts use CSS variables for theme-aware colors
+- SessionCard replaces inline session rendering in dashboard + history
+- Recharts Tooltip formatter uses inferred type — no explicit number cast
+
+### Tests Passed
+- Dashboard stats cards show correct counts ✅
+- Charts render with empty state messages when no data ✅
+- Charts populate after completing interviews ✅
+- SessionCard renders correctly in recent sessions list ✅
+- History page unaffected ✅
+
+### Files Created
+- hooks/useProgress.ts
+- components/dashboard/ProgressChart.tsx
+- components/dashboard/SkillRadar.tsx
+- components/dashboard/StatsCard.tsx
+- components/dashboard/SessionCard.tsx
+- components/dashboard/ProgressChartWrapper.tsx
+- app/(dashboard)/dashboard/page.tsx (updated)
+
+### Ready for Day 7
+- Resume upload UI
+- PDF text extraction
+- Supabase Storage integration
+- Resume analysis API route
