@@ -32,23 +32,18 @@ import {
   Clock,
 } from "lucide-react";
 import { useInterview } from "@/hooks/useInterview";
+import { useVoice } from "@/hooks/useVoice";
+import { VoiceToggle } from "@/components/interview/VoiceToggle";
 import type { InterviewType, ExperienceLevel } from "@/types/database";
 
 const setupSchema = z.object({
   role: z.string().min(2, "Please enter a role"),
   company: z.string().optional(),
   interview_type: z.enum([
-    "behavioral",
-    "technical",
-    "coding",
-    "system_design",
-    "mixed",
+    "behavioral", "technical", "coding", "system_design", "mixed",
   ] as const),
   experience_level: z.enum([
-    "fresher",
-    "junior",
-    "mid",
-    "senior",
+    "fresher", "junior", "mid", "senior",
   ] as const),
 });
 
@@ -56,6 +51,7 @@ type SetupFormData = z.infer<typeof setupSchema>;
 
 export default function InterviewPage() {
   const [userInput, setUserInput] = useState("");
+  const [isVoiceMode, setIsVoiceMode] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const {
@@ -70,6 +66,20 @@ export default function InterviewPage() {
     endInterview,
     resetInterview,
   } = useInterview();
+
+  const {
+    isSupported,
+    isListening,
+    isSpeaking,
+    transcript,
+    interimTranscript,
+    fillerWordCount,
+    startListening,
+    stopListening,
+    speak,
+    stopSpeaking,
+    resetTranscript,
+  } = useVoice();
 
   const {
     register,
@@ -92,6 +102,33 @@ export default function InterviewPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isAiTyping]);
 
+  // When AI sends a new message in voice mode — speak it aloud
+  useEffect(() => {
+    if (
+      !isVoiceMode ||
+      messages.length === 0 ||
+      interviewState !== "active"
+    )
+      return;
+
+    const lastMessage = messages[messages.length - 1];
+    if (lastMessage.role !== "assistant") return;
+
+    // Speak the AI message then auto-start listening
+    speak(lastMessage.content, () => {
+      if (isVoiceMode && interviewState === "active") {
+        startListening();
+      }
+    });
+  }, [messages]);
+
+  // When voice transcript is ready — populate the input
+  useEffect(() => {
+    if (transcript) {
+      setUserInput(transcript);
+    }
+  }, [transcript]);
+
   async function onStartInterview(data: SetupFormData) {
     await startInterview({
       role: data.role,
@@ -103,14 +140,32 @@ export default function InterviewPage() {
 
   async function onSendMessage() {
     if (!userInput.trim()) return;
+
+    // Stop listening before sending in voice mode
+    if (isListening) stopListening();
+
     const success = await sendMessage(userInput);
-    if (success) setUserInput("");
+    if (success) {
+      setUserInput("");
+      resetTranscript();
+    }
   }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       onSendMessage();
+    }
+  }
+
+  function handleToggleVoiceMode() {
+    if (isVoiceMode) {
+      // Turning off — stop everything
+      stopListening();
+      stopSpeaking();
+      setIsVoiceMode(false);
+    } else {
+      setIsVoiceMode(true);
     }
   }
 
@@ -140,7 +195,6 @@ export default function InterviewPage() {
               onSubmit={handleSubmit(onStartInterview)}
               className="space-y-5"
             >
-              {/* Role */}
               <div className="space-y-2">
                 <Label htmlFor="role">Target Role</Label>
                 <Input
@@ -155,7 +209,6 @@ export default function InterviewPage() {
                 )}
               </div>
 
-              {/* Company */}
               <div className="space-y-2">
                 <Label htmlFor="company">
                   Target Company{" "}
@@ -170,7 +223,6 @@ export default function InterviewPage() {
                 />
               </div>
 
-              {/* Interview Type */}
               <div className="space-y-2">
                 <Label>Interview Type</Label>
                 <Select
@@ -186,47 +238,32 @@ export default function InterviewPage() {
                     <SelectItem value="behavioral">Behavioral</SelectItem>
                     <SelectItem value="technical">Technical</SelectItem>
                     <SelectItem value="coding">Coding</SelectItem>
-                    <SelectItem value="system_design">
-                      System Design
-                    </SelectItem>
+                    <SelectItem value="system_design">System Design</SelectItem>
                     <SelectItem value="mixed">Mixed</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
-              {/* Experience Level */}
               <div className="space-y-2">
                 <Label>Experience Level</Label>
                 <Select
                   defaultValue="fresher"
                   onValueChange={(value) =>
-                    setValue(
-                      "experience_level",
-                      value as ExperienceLevel
-                    )
+                    setValue("experience_level", value as ExperienceLevel)
                   }
                 >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="fresher">
-                      Fresher — 0 years
-                    </SelectItem>
-                    <SelectItem value="junior">
-                      Junior — 1 to 2 years
-                    </SelectItem>
-                    <SelectItem value="mid">
-                      Mid-level — 3 to 5 years
-                    </SelectItem>
-                    <SelectItem value="senior">
-                      Senior — 5+ years
-                    </SelectItem>
+                    <SelectItem value="fresher">Fresher — 0 years</SelectItem>
+                    <SelectItem value="junior">Junior — 1 to 2 years</SelectItem>
+                    <SelectItem value="mid">Mid-level — 3 to 5 years</SelectItem>
+                    <SelectItem value="senior">Senior — 5+ years</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
-              {/* Type description hint */}
               <div className="rounded-lg bg-muted p-3 text-xs text-muted-foreground">
                 {watchedType === "behavioral" &&
                   "Questions about past experiences, teamwork, and soft skills using the STAR method."}
@@ -275,20 +312,12 @@ export default function InterviewPage() {
           {[
             { label: "Overall", score: feedback.overall_score },
             { label: "Technical", score: feedback.technical_score },
-            {
-              label: "Communication",
-              score: feedback.communication_score,
-            },
-            {
-              label: "Problem Solving",
-              score: feedback.problem_solving_score,
-            },
+            { label: "Communication", score: feedback.communication_score },
+            { label: "Problem Solving", score: feedback.problem_solving_score },
           ].map((item) => (
             <Card key={item.label}>
               <CardContent className="pt-4 pb-4 text-center">
-                <p className="text-xs text-muted-foreground">
-                  {item.label}
-                </p>
+                <p className="text-xs text-muted-foreground">{item.label}</p>
                 <p
                   className={`text-3xl font-bold mt-1 ${
                     item.score >= 7
@@ -307,6 +336,33 @@ export default function InterviewPage() {
             </Card>
           ))}
         </div>
+
+        {/* Filler word summary if voice was used */}
+        {fillerWordCount > 0 && (
+          <Card>
+            <CardContent className="py-4">
+              <div className="flex items-center gap-3">
+                <div className="h-9 w-9 rounded-lg bg-yellow-500/10 flex items-center justify-center">
+                  <MessageSquare className="h-4 w-4 text-yellow-500" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium">
+                    Voice Communication Analysis
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    You used{" "}
+                    <span className="font-semibold text-yellow-600">
+                      {fillerWordCount} filler{" "}
+                      {fillerWordCount === 1 ? "word" : "words"}
+                    </span>{" "}
+                    (um, uh, like, etc.) during this session. Aim
+                    for under 5 in a real interview.
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Strengths */}
         <Card>
@@ -349,9 +405,7 @@ export default function InterviewPage() {
         {/* Detailed Feedback */}
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-base">
-              📝 Detailed Feedback
-            </CardTitle>
+            <CardTitle className="text-base">📝 Detailed Feedback</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-sm leading-relaxed whitespace-pre-line text-muted-foreground">
@@ -367,12 +421,12 @@ export default function InterviewPage() {
     );
   }
 
-  // ── ACTIVE + ENDING INTERVIEW SCREEN ─────────────────────
+  // ── ACTIVE INTERVIEW SCREEN ───────────────────────────────
   return (
     <div className="flex flex-col h-[calc(100vh-8rem)]">
       {/* Interview Header */}
-      <div className="flex items-center justify-between mb-4 shrink-0">
-        <div className="flex items-center gap-2">
+      <div className="flex items-center justify-between mb-4 shrink-0 flex-wrap gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <Badge variant="secondary" className="gap-1">
             <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
             Live Interview
@@ -382,21 +436,37 @@ export default function InterviewPage() {
             {formatTime(elapsed)}
           </Badge>
         </div>
-        <Button
-          variant="destructive"
-          size="sm"
-          onClick={endInterview}
-          disabled={interviewState === "ending"}
-        >
-          {interviewState === "ending" ? (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          ) : (
-            <Square className="mr-2 h-4 w-4" />
-          )}
-          {interviewState === "ending"
-            ? "Generating Feedback..."
-            : "End Interview"}
-        </Button>
+
+        <div className="flex items-center gap-2 flex-wrap">
+          {/* Voice Toggle */}
+          <VoiceToggle
+            isSupported={isSupported}
+            isListening={isListening}
+            isSpeaking={isSpeaking}
+            isVoiceMode={isVoiceMode}
+            fillerWordCount={fillerWordCount}
+            onToggleVoiceMode={handleToggleVoiceMode}
+            onStartListening={startListening}
+            onStopListening={stopListening}
+            onStopSpeaking={stopSpeaking}
+          />
+
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={endInterview}
+            disabled={interviewState === "ending"}
+          >
+            {interviewState === "ending" ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Square className="mr-2 h-4 w-4" />
+            )}
+            {interviewState === "ending"
+              ? "Generating Feedback..."
+              : "End Interview"}
+          </Button>
+        </div>
       </div>
 
       {/* Messages */}
@@ -449,13 +519,24 @@ export default function InterviewPage() {
       </div>
 
       {/* Input Area */}
-      <div className="mt-4 shrink-0">
+      <div className="mt-4 shrink-0 space-y-2">
+        {/* Voice transcript preview */}
+        {isVoiceMode && interimTranscript && (
+          <div className="px-4 py-2 rounded-lg bg-muted/50 border border-dashed text-xs text-muted-foreground italic">
+            {interimTranscript}...
+          </div>
+        )}
+
         <div className="flex gap-2 items-center bg-muted rounded-2xl px-4 py-2">
           <Input
             value={userInput}
             onChange={(e) => setUserInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Type your answer... (Enter to send)"
+            placeholder={
+              isVoiceMode
+                ? "Click Speak or type your answer..."
+                : "Type your answer... (Enter to send)"
+            }
             disabled={isAiTyping || interviewState === "ending"}
             className="border-0 bg-transparent shadow-none focus-visible:ring-0 text-sm px-0"
           />
@@ -472,8 +553,10 @@ export default function InterviewPage() {
             <Send className="h-4 w-4" />
           </Button>
         </div>
-        <p className="text-xs text-muted-foreground text-center mt-2">
-          Press Enter to send • Click End Interview when finished
+        <p className="text-xs text-muted-foreground text-center">
+          {isVoiceMode
+            ? "Voice mode active — speak your answer or type it"
+            : "Press Enter to send • Click End Interview when finished"}
         </p>
       </div>
     </div>

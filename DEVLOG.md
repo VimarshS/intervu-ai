@@ -405,3 +405,24 @@ Always paste the relevant section when starting a new Claude session.
 - Users write function only
 - Changes: coding.ts prompt + piston client + practice page + coding problem route
 - Zero impact on interview module, resume, dashboard, auth
+
+### Day 9 Enhancement — LeetCode-style Execution
+**Date:** 2025-05-30
+
+### Changes Made
+- lib/ai/prompts/coding.ts — generates helper_code, starter_code, driver_code separately
+- lib/piston/client.ts — added executeWithDriver function
+- app/api/coding/problem/route.ts — passes new fields with safe defaults
+- app/(dashboard)/practice/page.tsx — userCode/helperCode/driverCode in separate state
+
+### How It Works
+- AI generates three code blocks per problem
+- helper_code: ListNode, TreeNode etc (hidden from user)
+- starter_code: function signature only (shown in editor)
+- driver_code: test harness with pass/fail output (hidden from user)
+- On Run: combines all three → sends to Judge0
+- On Submit: sends only userCode to AI reviewer
+- Auto-tested badge shows when driver_code is active
+
+### Zero Impact On
+- Interview module, resume analyzer, dashboard, auth — all untouched
