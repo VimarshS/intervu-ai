@@ -10,7 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { LogOut, User } from "lucide-react";
+import { LogOut, User, Settings } from "lucide-react";
 import Link from "next/link";
 
 export async function Navbar() {
@@ -22,11 +22,10 @@ export async function Navbar() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("full_name, avatar_url, email")
+    .select("full_name, avatar_url, email, target_role")
     .eq("id", user?.id ?? "")
     .single();
 
-  // Generate initials for avatar fallback
   const initials = profile?.full_name
     ? profile.full_name
         .split(" ")
@@ -37,55 +36,92 @@ export async function Navbar() {
     : profile?.email?.[0]?.toUpperCase() ?? "U";
 
   return (
-    <header className="h-16 border-b bg-card flex items-center justify-between px-6">
-      {/* Page context — left side empty, used by children via slots in future */}
-      <div />
+    <header className="h-14 border-b border-slate-800 bg-slate-950/80 backdrop-blur-sm flex items-center justify-between px-6 sticky top-0 z-30">
+      {/* Left — current context hint */}
+      <div className="flex items-center gap-2">
+        {profile?.target_role && (
+          <div className="hidden sm:flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800 border border-slate-700">
+            <div className="h-1.5 w-1.5 rounded-full bg-indigo-400" />
+            <span className="text-xs text-slate-300 font-medium">
+              {profile.target_role}
+            </span>
+          </div>
+        )}
+      </div>
 
-      {/* Right side — user menu */}
+      {/* Right — user menu */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="relative h-9 w-9 rounded-full">
-            <Avatar className="h-9 w-9">
+          <Button
+            variant="ghost"
+            className="flex items-center gap-2.5 h-9 px-2 rounded-lg hover:bg-slate-800 transition-colors"
+          >
+            <Avatar className="h-7 w-7 ring-2 ring-slate-700">
               <AvatarImage
                 src={profile?.avatar_url ?? ""}
                 alt={profile?.full_name ?? "User"}
               />
-              <AvatarFallback className="text-xs font-semibold">
+              <AvatarFallback className="text-xs font-semibold bg-indigo-500/20 text-indigo-300">
                 {initials}
               </AvatarFallback>
             </Avatar>
+            <div className="hidden sm:flex flex-col items-start">
+              <span className="text-xs font-medium text-slate-200 leading-none">
+                {profile?.full_name ?? "User"}
+              </span>
+              <span className="text-xs text-slate-500 leading-none mt-0.5">
+                {profile?.email ?? user?.email}
+              </span>
+            </div>
           </Button>
         </DropdownMenuTrigger>
 
-        <DropdownMenuContent className="w-56" align="end" forceMount>
-          <DropdownMenuLabel className="font-normal">
+        <DropdownMenuContent
+          className="w-56 bg-slate-900 border-slate-700"
+          align="end"
+          forceMount
+        >
+          <DropdownMenuLabel className="font-normal px-3 py-2">
             <div className="flex flex-col space-y-1">
-              <p className="text-sm font-medium leading-none">
+              <p className="text-sm font-medium text-slate-200 leading-none">
                 {profile?.full_name ?? "User"}
               </p>
-              <p className="text-xs leading-none text-muted-foreground">
+              <p className="text-xs text-slate-500 leading-none mt-1">
                 {profile?.email ?? user?.email}
               </p>
             </div>
           </DropdownMenuLabel>
 
-          <DropdownMenuSeparator />
+          <DropdownMenuSeparator className="bg-slate-700" />
 
-          <DropdownMenuItem asChild>
-            <Link href="/profile" className="cursor-pointer">
-              <User className="mr-2 h-4 w-4" />
+          <DropdownMenuItem
+            asChild
+            className="text-slate-300 focus:bg-slate-800 focus:text-slate-100 cursor-pointer"
+          >
+            <Link href="/profile">
+              <Settings className="mr-2 h-4 w-4 text-slate-400" />
               Profile Settings
             </Link>
           </DropdownMenuItem>
 
-          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            asChild
+            className="text-slate-300 focus:bg-slate-800 focus:text-slate-100 cursor-pointer"
+          >
+            <Link href="/dashboard">
+              <User className="mr-2 h-4 w-4 text-slate-400" />
+              Dashboard
+            </Link>
+          </DropdownMenuItem>
+
+          <DropdownMenuSeparator className="bg-slate-700" />
 
           <form action={signOut}>
-            <DropdownMenuItem asChild>
-              <button
-                type="submit"
-                className="w-full cursor-pointer text-destructive focus:text-destructive"
-              >
+            <DropdownMenuItem
+              asChild
+              className="text-red-400 focus:bg-red-500/10 focus:text-red-300 cursor-pointer"
+            >
+              <button type="submit" className="w-full">
                 <LogOut className="mr-2 h-4 w-4" />
                 Sign Out
               </button>

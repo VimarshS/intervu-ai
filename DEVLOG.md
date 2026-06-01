@@ -426,3 +426,43 @@ Always paste the relevant section when starting a new Claude session.
 
 ### Zero Impact On
 - Interview module, resume analyzer, dashboard, auth — all untouched
+
+## Day 10 — Voice Interview Mode
+**Date:** 2025-05-31
+
+### Built
+- useVoice hook (STT + TTS via Web Speech API)
+- VoiceToggle component with mic, speaking indicators, filler counter
+- Interview page updated with full voice mode integration
+- Auto-listen after AI speaks in voice mode
+- Filler word detection (um, uh, like, you know, etc.)
+- Filler word summary on feedback screen for voice sessions
+- Interim transcript preview while user is speaking
+
+### Key Decisions
+- Web Speech API typed with any — avoids DOM type conflicts
+- SpeechRecognitionAPI variable name avoids collision with DOM types
+- speak() onEnd callback auto-starts listening — natural conversation flow
+- stopListening() called before sendMessage — prevents capturing AI speech
+- Voice and text modes coexist — toggle between them mid-session
+- interimTranscript shown as dashed preview box above input
+- Unsupported browser shows warning — no broken buttons
+
+### Tests Passed
+- Voice toggle appears during active interview ✅
+- AI speaks questions aloud in voice mode ✅
+- STT captures user speech and populates input ✅
+- Filler word badge counts correctly ✅
+- Text mode unchanged and working ✅
+- Filler summary appears on feedback screen ✅
+
+### Files Created
+- hooks/useVoice.ts
+- components/interview/VoiceToggle.tsx
+- app/(dashboard)/interview/page.tsx (updated)
+
+### Ready for Day 11
+- Final deployment to Vercel
+- Environment variables on Vercel
+- Production testing
+- README finalization

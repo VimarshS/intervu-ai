@@ -14,6 +14,13 @@ import {
 import Link from "next/link";
 import { SessionCard } from "@/components/dashboard/SessionCard";
 
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Session History — Intervu AI",
+  description: "Review all your past interview sessions",
+};
+
 interface RawSession {
   id: string;
   interview_type: string;

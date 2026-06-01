@@ -24,6 +24,12 @@ import Link from "next/link";
 import { StatsCard } from "@/components/dashboard/StatsCard";
 import { SessionCard } from "@/components/dashboard/SessionCard";
 import { ProgressChartWrapper } from "@/components/dashboard/ProgressChartWrapper";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Dashboard — Intervu AI",
+  description: "Your interview preparation progress and overview",
+};
 
 export default async function DashboardPage() {
   const supabase = await createClient();
