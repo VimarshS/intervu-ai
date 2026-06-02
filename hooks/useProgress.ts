@@ -44,7 +44,7 @@ interface RawSession {
     technical_score: number | null;
     communication_score: number | null;
     problem_solving_score: number | null;
-  } | null;
+  }[] | null;
 }
 
 export function useProgress() {
@@ -91,26 +91,28 @@ export function useProgress() {
 
         // Cast to our explicit type — bypasses Supabase inference issues
        const completed = (rawSessions ?? []) as unknown as RawSession[];
-
+      
         // Build chart data — only sessions that have feedback
         const chartData: SessionDataPoint[] = [];
 
         for (const s of completed) {
-          if (!s.feedback_reports) continue;
+  if (!s.feedback_reports || s.feedback_reports.length === 0) continue;
 
-          chartData.push({
-            date: new Date(s.created_at).toLocaleDateString("en-IN", {
-              day: "numeric",
-              month: "short",
-            }),
-            overall: s.feedback_reports.overall_score ?? 0,
-            technical: s.feedback_reports.technical_score ?? 0,
-            communication: s.feedback_reports.communication_score ?? 0,
-            problem_solving:
-              s.feedback_reports.problem_solving_score ?? 0,
-            interview_type: s.interview_type,
-          });
-        }
+  // Supabase returns one-to-many as array — take first element
+  const fb = s.feedback_reports[0];
+
+  chartData.push({
+    date: new Date(s.created_at).toLocaleDateString("en-IN", {
+      day: "numeric",
+      month: "short",
+    }),
+    overall: fb.overall_score ?? 0,
+    technical: fb.technical_score ?? 0,
+    communication: fb.communication_score ?? 0,
+    problem_solving: fb.problem_solving_score ?? 0,
+    interview_type: s.interview_type,
+  });
+}
 
         // Average scores for radar chart
         const count = chartData.length;
