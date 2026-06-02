@@ -498,3 +498,39 @@ Always paste the relevant section when starting a new Claude session.
 - Deploy to Vercel
 - Set production environment variables
 - Update Supabase redirect URLs
+
+## Day 12 — Deployment
+**Date:** 2025-06-02
+
+### Built
+- Pre-deployment build check — zero errors
+- README.md documentation
+- .env.example updated with all variables
+- GitHub repository created and pushed
+- Vercel deployment configured
+- Environment variables set on Vercel
+- Supabase redirect URLs updated for production
+
+### Production URL
+https://intervu-ai-weld.vercel.app
+
+### Post-Deployment Config Done
+- NEXT_PUBLIC_SITE_URL updated on Vercel ✅
+- Supabase Site URL updated ✅
+- Supabase redirect URL added for production ✅
+- Redeployment triggered ✅
+
+### Tests Passed on Production
+- Landing page loads ✅
+- Signup works ✅
+- Onboarding completes ✅
+- AI interview works ✅
+- Sign out works ✅
+- Login redirects correctly ✅
+- Route protection working ✅
+
+### Issues Fixed During Polish
+- Sign out button broken — removed DropdownMenuItem asChild wrapper
+- Mobile sign out missing — added to Sidebar mobile drawer
+- Dark theme applied — slate + indigo color system
+- Space Grotesk + Inter fonts loaded via next/font
