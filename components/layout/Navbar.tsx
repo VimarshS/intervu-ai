@@ -52,29 +52,32 @@ export async function Navbar() {
       {/* Right — user menu */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button
-            variant="ghost"
-            className="flex items-center gap-2.5 h-9 px-2 rounded-lg hover:bg-slate-800 transition-colors"
-          >
-            <Avatar className="h-7 w-7 ring-2 ring-slate-700">
-              <AvatarImage
-                src={profile?.avatar_url ?? ""}
-                alt={profile?.full_name ?? "User"}
-              />
-              <AvatarFallback className="text-xs font-semibold bg-indigo-500/20 text-indigo-300">
-                {initials}
-              </AvatarFallback>
-            </Avatar>
-            <div className="hidden sm:flex flex-col items-start">
-              <span className="text-xs font-medium text-slate-200 leading-none">
-                {profile?.full_name ?? "User"}
-              </span>
-              <span className="text-xs text-slate-500 leading-none mt-0.5">
-                {profile?.email ?? user?.email}
-              </span>
-            </div>
-          </Button>
-        </DropdownMenuTrigger>
+  <Button
+    variant="ghost"
+    className="flex items-center gap-2 h-9 px-2 rounded-lg hover:bg-slate-800 transition-colors"
+  >
+    <Avatar className="h-7 w-7 ring-2 ring-slate-700">
+      <AvatarImage
+        src={profile?.avatar_url ?? ""}
+        alt={profile?.full_name ?? "User"}
+      />
+      <AvatarFallback className="text-xs font-semibold bg-indigo-500/20 text-indigo-300">
+        {initials}
+      </AvatarFallback>
+    </Avatar>
+    {/* Show initials/name on mobile too — truncated */}
+    <div className="flex flex-col items-start max-w-[100px] sm:max-w-none">
+      <span className="text-xs font-medium text-slate-200 leading-none truncate w-full">
+        {profile?.full_name
+          ? profile.full_name.split(" ")[0]
+          : profile?.email?.split("@")[0] ?? "User"}
+      </span>
+      <span className="hidden sm:block text-xs text-slate-500 leading-none mt-0.5 truncate w-full">
+        {profile?.email ?? user?.email}
+      </span>
+    </div>
+  </Button>
+</DropdownMenuTrigger>
 
         <DropdownMenuContent
           className="w-56 bg-slate-900 border-slate-700"
@@ -116,17 +119,15 @@ export async function Navbar() {
 
           <DropdownMenuSeparator className="bg-slate-700" />
 
-          <form action={signOut}>
-            <DropdownMenuItem
-              asChild
-              className="text-red-400 focus:bg-red-500/10 focus:text-red-300 cursor-pointer"
-            >
-              <button type="submit" className="w-full">
-                <LogOut className="mr-2 h-4 w-4" />
-                Sign Out
-              </button>
-            </DropdownMenuItem>
-          </form>
+<form action={signOut} className="w-full">
+  <button
+    type="submit"
+    className="w-full flex items-center px-2 py-1.5 text-sm text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-sm cursor-pointer transition-colors"
+  >
+    <LogOut className="mr-2 h-4 w-4" />
+    Sign Out
+  </button>
+</form>
         </DropdownMenuContent>
       </DropdownMenu>
     </header>

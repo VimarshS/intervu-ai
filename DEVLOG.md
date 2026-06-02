@@ -466,3 +466,35 @@ Always paste the relevant section when starting a new Claude session.
 - Environment variables on Vercel
 - Production testing
 - README finalization
+
+
+## UI/UX Polish Pass — Pre-Deployment
+**Date:** 2025-06-01
+
+### Design System Applied
+- Dark slate + indigo color system via CSS variables in globals.css
+- oklch color space for perceptually uniform colors
+- Space Grotesk for headings, Inter for body text via next/font
+- Custom scrollbar styling matching dark theme
+
+### Files Updated
+- app/globals.css — full dark theme CSS variable system
+- app/layout.tsx — Space Grotesk + Inter font setup
+- components/layout/Sidebar.tsx — indigo active states, slate chrome
+- components/layout/Navbar.tsx — sticky blur navbar, target role pill
+- app/page.tsx — premium landing page full redesign
+- components/dashboard/StatsCard.tsx — dark card with refined typography
+
+### Design Decisions
+- oklch(0.10) background — dark slate, not pure black
+- indigo-500/15 active state — subtle glow not solid fill
+- backdrop-blur-sm on navbar — premium sticky nav pattern
+- Space Grotesk inline style — reliable across Tailwind v4
+- All other pages inherit theme automatically from CSS variables
+
+### Ready for Deployment
+- npm run build → fix any errors
+- Push to GitHub
+- Deploy to Vercel
+- Set production environment variables
+- Update Supabase redirect URLs

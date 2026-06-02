@@ -13,9 +13,11 @@ import {
   User,
   Menu,
   X,
+  LogOut,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { signOut } from "@/app/(auth)/login/actions";
 
 const navItems = [
   {
@@ -159,14 +161,35 @@ export function Sidebar() {
       )}
 
       {/* Mobile Drawer */}
-      <div
-        className={cn(
-          "md:hidden fixed top-14 left-0 bottom-0 z-40 w-64 bg-slate-950 border-r border-slate-800 px-3 py-4 space-y-1 transition-transform duration-200",
-          mobileOpen ? "translate-x-0" : "-translate-x-full"
-        )}
+<div
+  className={cn(
+    "md:hidden fixed top-14 left-0 bottom-0 z-40 w-64 bg-slate-950 border-r border-slate-800 px-3 py-4 flex flex-col transition-transform duration-200",
+    mobileOpen ? "translate-x-0" : "-translate-x-full"
+  )}
+>
+  <NavLinks />
+
+  {/* Mobile user info + sign out */}
+  <div className="mt-auto pt-4 border-t border-slate-800 space-y-3">
+    <div className="px-3 py-2 rounded-lg bg-slate-900 border border-slate-800">
+      <p className="text-xs font-medium text-slate-300 truncate">
+        Signed in
+      </p>
+      <p className="text-xs text-slate-500 truncate">
+        Tap below to sign out
+      </p>
+    </div>
+    <form action={signOut} className="w-full">
+      <button
+        type="submit"
+        className="w-full flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-colors border border-transparent"
       >
-        <NavLinks />
-      </div>
+        <LogOut className="h-4 w-4 shrink-0" />
+        Sign Out
+      </button>
+    </form>
+  </div>
+</div>
 
       {/* Mobile spacer */}
       <div className="md:hidden h-14 shrink-0" />
