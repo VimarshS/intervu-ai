@@ -19,6 +19,12 @@ export interface Profile {
   is_onboarded: boolean;
   created_at: string;
   updated_at: string;
+  // New fields
+  linkedin_url: string | null;
+  github_url: string | null;
+  bio: string | null;
+  skills: string[] | null;
+  interview_goal: string | null;
 }
 
 export interface InterviewSession {

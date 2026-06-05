@@ -534,3 +534,25 @@ https://intervu-ai-weld.vercel.app
 - Mobile sign out missing — added to Sidebar mobile drawer
 - Dark theme applied — slate + indigo color system
 - Space Grotesk + Inter fonts loaded via next/font
+
+### Bug Fix — Progress Charts
+**Date:** 2025-06-02
+
+### Issue
+Score Progress and Skill Radar charts showing empty despite 9 completed sessions.
+
+### Root Cause
+Supabase returns one-to-many joins as arrays even for single records.
+RawSession interface typed feedback_reports as object | null but
+Supabase was returning it as array. s.feedback_reports.overall_score
+was silently failing — should be s.feedback_reports[0].overall_score.
+
+### Fix
+- RawSession interface: feedback_reports type changed to {}[] | null
+- chartData loop: access fb = s.feedback_reports[0] then fb.overall_score
+- Removed temporary console.log debug statements
+
+### Lesson
+Always check actual Supabase response shape in browser console when
+joined queries return unexpected results. One-to-many always returns
+arrays even when only one record exists.
