@@ -556,3 +556,52 @@ was silently failing — should be s.feedback_reports[0].overall_score.
 Always check actual Supabase response shape in browser console when
 joined queries return unexpected results. One-to-many always returns
 arrays even when only one record exists.
+
+## Profile Enhancement
+**Date:** 2025-06-02
+
+### Built
+- Enhanced profile view page (server component — fast, no loading state)
+- Separate edit page at /profile/edit (client component with all forms)
+- Interview readiness score with weighted formula
+- Skills management with add/remove tags
+- Social links (LinkedIn, GitHub)
+- Bio and interview goal fields
+- Change password functionality
+- Delete account with confirmation dialog
+- New database columns: linkedin_url, github_url, bio, skills, interview_goal
+
+### Key Decisions
+- Profile split into view (/profile) and edit (/profile/edit) pages
+- View page is Server Component — fetches data server-side, no loading spinner
+- Edit page is Client Component — needs form state and interactions
+- useProfile hook handles all data fetching and mutations for edit page
+- ProfileUpdates interface defined at module level — fixes TypeScript generic errors
+- Readiness score formula: sessions (40%) + average score (40%) + best score bonus (20%)
+- Skills stored as TEXT[] in Supabase — array type
+- Social links use Next.js Link component — avoids JSX anchor tag encoding issues
+- Save redirects to /profile — user sees updated info immediately
+
+### Database Changes
+- ALTER TABLE profiles ADD COLUMN linkedin_url TEXT
+- ALTER TABLE profiles ADD COLUMN github_url TEXT
+- ALTER TABLE profiles ADD COLUMN bio TEXT
+- ALTER TABLE profiles ADD COLUMN skills TEXT[]
+- ALTER TABLE profiles ADD COLUMN interview_goal TEXT
+
+### Files Created
+- hooks/useProfile.ts
+- app/(dashboard)/profile/page.tsx (replaced — view only)
+- app/(dashboard)/profile/edit/page.tsx (new — all forms)
+- types/database.ts (updated — new profile fields)
+
+### Tests Passed
+- Profile view shows all user data correctly ✅
+- Edit Profile button navigates to /profile/edit ✅
+- Back arrow and Cancel return to /profile ✅
+- Profile saves and redirects to view page ✅
+- Skills add and remove correctly ✅
+- Social links display on profile view ✅
+- Readiness score calculates from real session data ✅
+- Change password works ✅
+- Delete account confirmation works ✅
