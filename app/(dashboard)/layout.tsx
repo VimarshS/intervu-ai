@@ -2,6 +2,8 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Navbar } from "@/components/layout/Navbar";
+// import { FeedbackWidget } from "@/components/feedback/FeedbackWidget";
+import { FeedbackWidget } from "../../components/feedback/FeedbackWidget";
 
 export default async function DashboardLayout({
   children,
@@ -18,14 +20,12 @@ export default async function DashboardLayout({
     redirect("/login");
   }
 
-  // Check if user has completed onboarding
   const { data: profile } = await supabase
     .from("profiles")
     .select("is_onboarded")
     .eq("id", user.id)
     .single();
 
-  // Redirect to onboarding if not completed
   if (profile && !profile.is_onboarded) {
     redirect("/onboarding");
   }
@@ -34,7 +34,6 @@ export default async function DashboardLayout({
     <div className="flex min-h-screen bg-background">
       <Sidebar />
       <div className="flex flex-col flex-1 min-w-0">
-        {/* Desktop navbar only — mobile has its own header in Sidebar */}
         <div className="hidden md:block">
           <Navbar />
         </div>
@@ -42,6 +41,8 @@ export default async function DashboardLayout({
           {children}
         </main>
       </div>
+      {/* Feedback widget — appears on all dashboard pages */}
+      <FeedbackWidget />
     </div>
   );
 }

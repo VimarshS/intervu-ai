@@ -143,10 +143,17 @@ export default function ResumePage() {
               <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center">
                 <FileText className="h-6 w-6 text-muted-foreground" />
               </div>
-              <p className="font-medium text-sm">No past analyses</p>
-              <p className="text-xs text-muted-foreground">
-                Upload your resume above to get started
-              </p>
+              <p
+  className="font-medium text-slate-300"
+  style={{ fontFamily: "var(--font-space-grotesk)" }}
+>
+  No resume analyses yet
+</p>
+<p className="text-xs text-slate-500">
+  Upload your resume above. You will get an ATS score,
+  skill gaps, and the 5 questions you are likely to be
+  asked about your specific experience.
+</p>
             </CardContent>
           </Card>
         )}

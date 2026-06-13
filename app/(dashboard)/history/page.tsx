@@ -212,12 +212,18 @@ export default async function HistoryPage() {
                 <MessageSquare className="h-7 w-7 text-muted-foreground" />
               </div>
               <div>
-                <p className="font-medium">No sessions yet</p>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Complete your first mock interview to see your
-                  history here
-                </p>
-              </div>
+          <p
+            className="font-medium text-slate-300"
+            style={{ fontFamily: "var(--font-space-grotesk)" }}
+           >
+            No sessions yet — that&apos;s about to change.
+          </p>
+          <p className="text-sm text-slate-500 mt-1">
+            Complete your first mock interview to see your
+            progress here. Most users feel more confident
+            after just 3 sessions.
+          </p>
+                        </div>
               <Button asChild size="sm">
                 <Link href="/interview">
                   Start First Interview
