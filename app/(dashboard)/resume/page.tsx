@@ -84,14 +84,19 @@ export default function ResumePage() {
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
-      {/* Page Header */}
-      <div>
-        <h1 className="text-2xl font-bold">Resume Analyzer</h1>
-        <p className="text-muted-foreground text-sm mt-1">
-          Upload your resume for AI-powered analysis, gap detection,
-          and predicted interview questions
-        </p>
-      </div>
+  {/* Page Header */}
+  <div className="pt-2">
+    <h1
+      className="text-2xl font-bold text-slate-50"
+      style={{ fontFamily: "var(--font-space-grotesk)" }}
+    >
+      Resume Analyzer
+    </h1>
+    <p className="text-slate-400 text-sm mt-1">
+      Upload your resume for AI-powered analysis, gap detection,
+      and predicted interview questions
+    </p>
+  </div>
 
       {/* Upload Card */}
       <Card>

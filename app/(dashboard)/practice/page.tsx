@@ -368,26 +368,33 @@ export default function PracticePage() {
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 flex-wrap">
-          {problem && (
-            <>
-              <h1 className="text-lg font-bold">{problem.title}</h1>
-              <Badge
-                variant="outline"
-                className={getDifficultyColor(problem.difficulty)}
-              >
-                {problem.difficulty}
-              </Badge>
-              <Badge variant="secondary">{problem.topic}</Badge>
-            </>
-          )}
-        </div>
-        <Button variant="outline" size="sm" onClick={resetPractice}>
-          <RefreshCw className="h-4 w-4 mr-1" />
-          New Problem
-        </Button>
-      </div>
+       <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:justify-between">
+  <div className="flex items-center gap-2 flex-wrap min-w-0">
+    {problem && (
+      <>
+        <h1 className="text-base font-bold text-slate-100 truncate">
+          {problem.title}
+        </h1>
+        <Badge
+          variant="outline"
+          className={getDifficultyColor(problem.difficulty)}
+        >
+          {problem.difficulty}
+        </Badge>
+        <Badge variant="secondary">{problem.topic}</Badge>
+      </>
+    )}
+  </div>
+  <Button
+    variant="outline"
+    size="sm"
+    onClick={resetPractice}
+    className="shrink-0 self-start sm:self-auto"
+  >
+    <RefreshCw className="h-4 w-4 mr-1" />
+    New Problem
+  </Button>
+</div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Left — Problem + Review */}
@@ -596,71 +603,72 @@ export default function PracticePage() {
 
         {/* Right — Editor + Output */}
         <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Select
-                value={selectedLanguage.language}
-                onValueChange={handleLanguageChange}
-              >
-                <SelectTrigger className="w-40 h-8 text-xs">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {SUPPORTED_LANGUAGES.map((lang) => (
-                    <SelectItem
-                      key={lang.language}
-                      value={lang.language}
-                    >
-                      {LANGUAGE_DISPLAY_NAMES[lang.language]}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {/* Indicator that driver code is active */}
-              {driverCode && (
-                <Badge variant="secondary" className="text-xs">
-                  Auto-tested
-                </Badge>
-              )}
-            </div>
+           <div className="flex flex-col sm:flex-row gap-2 sm:items-center sm:justify-between">
+  <div className="flex items-center gap-2">
+    <Select
+      value={selectedLanguage.language}
+      onValueChange={handleLanguageChange}
+    >
+      <SelectTrigger className="w-36 h-8 text-xs">
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        {SUPPORTED_LANGUAGES.map((lang) => (
+          <SelectItem
+            key={lang.language}
+            value={lang.language}
+          >
+            {LANGUAGE_DISPLAY_NAMES[lang.language]}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+    {driverCode && (
+      <Badge variant="secondary" className="text-xs">
+        Auto-tested
+      </Badge>
+    )}
+  </div>
 
-            <div className="flex gap-2">
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={runCode}
-                disabled={
-                  practiceState === "running" ||
-                  practiceState === "reviewing"
-                }
-              >
-                {practiceState === "running" ? (
-                  <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
-                ) : (
-                  <Play className="h-3.5 w-3.5 mr-1.5" />
-                )}
-                Run
-              </Button>
-              <Button
-                size="sm"
-                onClick={submitSolution}
-                disabled={
-                  practiceState === "running" ||
-                  practiceState === "reviewing" ||
-                  practiceState === "reviewed"
-                }
-              >
-                {practiceState === "reviewing" ? (
-                  <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
-                ) : (
-                  <BrainCircuit className="h-3.5 w-3.5 mr-1.5" />
-                )}
-                {practiceState === "reviewed"
-                  ? "Reviewed"
-                  : "Submit for Review"}
-              </Button>
-            </div>
-          </div>
+  <div className="flex gap-2">
+    <Button
+      size="sm"
+      variant="outline"
+      onClick={runCode}
+      disabled={
+        practiceState === "running" ||
+        practiceState === "reviewing"
+      }
+      className="flex-1 sm:flex-none"
+    >
+      {practiceState === "running" ? (
+        <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+      ) : (
+        <Play className="h-3.5 w-3.5 mr-1.5" />
+      )}
+      Run
+    </Button>
+    <Button
+      size="sm"
+      onClick={submitSolution}
+      disabled={
+        practiceState === "running" ||
+        practiceState === "reviewing" ||
+        practiceState === "reviewed"
+      }
+      className="flex-1 sm:flex-none"
+    >
+      {practiceState === "reviewing" ? (
+        <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+      ) : (
+        <BrainCircuit className="h-3.5 w-3.5 mr-1.5" />
+      )}
+      {practiceState === "reviewed"
+        ? "Reviewed"
+        : "Submit for Review"}
+    </Button>
+  </div>
+</div>
 
           {/* Monaco Editor — shows only user's function */}
           <CodeEditor
