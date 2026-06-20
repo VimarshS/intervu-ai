@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 
 interface UploadZoneProps {
   onAnalysisComplete: (analysis: ResumeAnalysis) => void;
+  onPaymentRequired?: () => void;
   isAnalyzing: boolean;
   setIsAnalyzing: (value: boolean) => void;
 }
@@ -142,11 +143,15 @@ export function UploadZone({
 
       const result = await response.json();
 
-      if (!response.ok) {
-        toast.error(result.error ?? "Analysis failed");
-        return;
-      }
+      if (response.status === 402) {
+  onPaymentRequired?.();
+  return;
+}
 
+if (!response.ok) {
+  toast.error(result.message ?? "Analysis failed. Please try again.");
+  return;
+}
       setExtractionProgress(100);
       toast.success("Resume analyzed successfully!");
       onAnalysisComplete(result.analysis);

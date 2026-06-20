@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { CodeEditor } from "@/components/coding/CodeEditor";
 import { OutputPanel } from "@/components/coding/OutputPanel";
 import { Button } from "@/components/ui/button";
+import { UpgradeModal } from "@/components/credits/UpgradeModal";
 import {
   Card,
   CardContent,
@@ -73,25 +74,19 @@ export default function PracticePage() {
     SUPPORTED_LANGUAGES[0]
   );
   const [selectedTopic, setSelectedTopic] = useState<string>("");
-
-  // User only edits this — the visible function code
   const [userCode, setUserCode] = useState(
     DEFAULT_CODE[SUPPORTED_LANGUAGES[0].language]
   );
-
-  // Hidden from user — stored separately
   const [helperCode, setHelperCode] = useState<string>("");
   const [driverCode, setDriverCode] = useState<string>("");
-
   const [problem, setProblem] = useState<CodingProblem | null>(null);
   const [output, setOutput] = useState<string | null>(null);
   const [outputError, setOutputError] = useState<string | null>(null);
-  const [executionTime, setExecutionTime] = useState<number | null>(
-    null
-  );
+  const [executionTime, setExecutionTime] = useState<number | null>(null);
   const [review, setReview] = useState<CodeReview | null>(null);
   const [showHint, setShowHint] = useState(false);
   const [hintIndex, setHintIndex] = useState(0);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
   const topics = [
     "Arrays", "Strings", "Linked Lists", "Trees", "Graphs",
@@ -119,6 +114,13 @@ export default function PracticePage() {
 
       const data = await response.json();
 
+      // ── CREDIT CHECK ─────────────────────────────────────
+      if (response.status === 402) {
+        setShowUpgradeModal(true);
+        setPracticeState("setup");
+        return;
+      }
+
       if (!response.ok) {
         toast.error(data.error ?? "Failed to generate problem");
         setPracticeState("setup");
@@ -126,19 +128,12 @@ export default function PracticePage() {
       }
 
       const p: CodingProblem = data.problem;
-
       setProblem(p);
-
-      // Store hidden code separately — user never sees these
       setHelperCode(p.helper_code ?? "");
       setDriverCode(p.driver_code ?? "");
-
-      // Only show the function starter code in the editor
       setUserCode(
-        p.starter_code ||
-        DEFAULT_CODE[selectedLanguage.language]
+        p.starter_code || DEFAULT_CODE[selectedLanguage.language]
       );
-
       setPracticeState("solving");
     } catch (err) {
       console.error("Problem generation error:", err);
@@ -166,7 +161,6 @@ export default function PracticePage() {
         body: JSON.stringify({
           language: selectedLanguage.language,
           version: selectedLanguage.version,
-          // Combine all three parts — user only wrote the middle part
           code: [helperCode, userCode, driverCode]
             .filter((p) => p && p.trim().length > 0)
             .join("\n"),
@@ -212,7 +206,6 @@ export default function PracticePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           problem: problem.problem,
-          // Send only the user's function — not helper or driver
           code: userCode,
           language: selectedLanguage.language,
           output: output ?? "No output — code was not run",
@@ -237,9 +230,7 @@ export default function PracticePage() {
   }
 
   function handleLanguageChange(language: string) {
-    const lang = SUPPORTED_LANGUAGES.find(
-      (l) => l.language === language
-    );
+    const lang = SUPPORTED_LANGUAGES.find((l) => l.language === language);
     if (lang) {
       setSelectedLanguage(lang);
       setUserCode(DEFAULT_CODE[language]);
@@ -346,6 +337,12 @@ export default function PracticePage() {
             </Button>
           </CardContent>
         </Card>
+
+        {/* Upgrade Modal */}
+        <UpgradeModal
+          isOpen={showUpgradeModal}
+          onClose={() => setShowUpgradeModal(false)}
+        />
       </div>
     );
   }
@@ -368,33 +365,33 @@ export default function PracticePage() {
   return (
     <div className="space-y-4">
       {/* Header */}
-       <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:justify-between">
-  <div className="flex items-center gap-2 flex-wrap min-w-0">
-    {problem && (
-      <>
-        <h1 className="text-base font-bold text-slate-100 truncate">
-          {problem.title}
-        </h1>
-        <Badge
+      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:justify-between">
+        <div className="flex items-center gap-2 flex-wrap min-w-0">
+          {problem && (
+            <>
+              <h1 className="text-base font-bold text-slate-100 truncate">
+                {problem.title}
+              </h1>
+              <Badge
+                variant="outline"
+                className={getDifficultyColor(problem.difficulty)}
+              >
+                {problem.difficulty}
+              </Badge>
+              <Badge variant="secondary">{problem.topic}</Badge>
+            </>
+          )}
+        </div>
+        <Button
           variant="outline"
-          className={getDifficultyColor(problem.difficulty)}
+          size="sm"
+          onClick={resetPractice}
+          className="shrink-0 self-start sm:self-auto"
         >
-          {problem.difficulty}
-        </Badge>
-        <Badge variant="secondary">{problem.topic}</Badge>
-      </>
-    )}
-  </div>
-  <Button
-    variant="outline"
-    size="sm"
-    onClick={resetPractice}
-    className="shrink-0 self-start sm:self-auto"
-  >
-    <RefreshCw className="h-4 w-4 mr-1" />
-    New Problem
-  </Button>
-</div>
+          <RefreshCw className="h-4 w-4 mr-1" />
+          New Problem
+        </Button>
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Left — Problem + Review */}
@@ -422,15 +419,11 @@ export default function PracticePage() {
                         className="rounded-lg bg-muted p-3 space-y-1 text-xs font-mono"
                       >
                         <p>
-                          <span className="text-muted-foreground">
-                            Input:
-                          </span>{" "}
+                          <span className="text-muted-foreground">Input:</span>{" "}
                           {ex.input}
                         </p>
                         <p>
-                          <span className="text-muted-foreground">
-                            Output:
-                          </span>{" "}
+                          <span className="text-muted-foreground">Output:</span>{" "}
                           {ex.output}
                         </p>
                         {ex.explanation && (
@@ -506,9 +499,7 @@ export default function PracticePage() {
               <CardContent className="space-y-4 text-sm">
                 <div className="grid grid-cols-3 gap-2 text-center">
                   <div className="rounded-lg bg-muted p-2">
-                    <p className="text-xs text-muted-foreground">
-                      Score
-                    </p>
+                    <p className="text-xs text-muted-foreground">Score</p>
                     <p
                       className={`text-xl font-bold ${
                         review.overall_score >= 7
@@ -522,17 +513,13 @@ export default function PracticePage() {
                     </p>
                   </div>
                   <div className="rounded-lg bg-muted p-2">
-                    <p className="text-xs text-muted-foreground">
-                      Time
-                    </p>
+                    <p className="text-xs text-muted-foreground">Time</p>
                     <p className="text-sm font-semibold">
                       {review.time_complexity}
                     </p>
                   </div>
                   <div className="rounded-lg bg-muted p-2">
-                    <p className="text-xs text-muted-foreground">
-                      Space
-                    </p>
+                    <p className="text-xs text-muted-foreground">Space</p>
                     <p className="text-sm font-semibold">
                       {review.space_complexity}
                     </p>
@@ -551,9 +538,7 @@ export default function PracticePage() {
                         key={i}
                         className="text-xs text-muted-foreground flex gap-2"
                       >
-                        <span className="text-green-500 shrink-0">
-                          •
-                        </span>
+                        <span className="text-green-500 shrink-0">•</span>
                         {s}
                       </p>
                     ))}
@@ -570,9 +555,7 @@ export default function PracticePage() {
                         key={i}
                         className="text-xs text-muted-foreground flex gap-2"
                       >
-                        <span className="text-orange-500 shrink-0">
-                          •
-                        </span>
+                        <span className="text-orange-500 shrink-0">•</span>
                         {imp}
                       </p>
                     ))}
@@ -580,18 +563,14 @@ export default function PracticePage() {
                 )}
 
                 <div className="space-y-1">
-                  <p className="text-xs font-semibold">
-                    💡 Optimized Approach
-                  </p>
+                  <p className="text-xs font-semibold">💡 Optimized Approach</p>
                   <p className="text-xs text-muted-foreground leading-relaxed">
                     {review.optimized_approach}
                   </p>
                 </div>
 
                 <div className="space-y-1">
-                  <p className="text-xs font-semibold">
-                    📝 Detailed Review
-                  </p>
+                  <p className="text-xs font-semibold">📝 Detailed Review</p>
                   <p className="text-xs text-muted-foreground leading-relaxed whitespace-pre-line">
                     {review.detailed_review}
                   </p>
@@ -603,74 +582,73 @@ export default function PracticePage() {
 
         {/* Right — Editor + Output */}
         <div className="space-y-3">
-           <div className="flex flex-col sm:flex-row gap-2 sm:items-center sm:justify-between">
-  <div className="flex items-center gap-2">
-    <Select
-      value={selectedLanguage.language}
-      onValueChange={handleLanguageChange}
-    >
-      <SelectTrigger className="w-36 h-8 text-xs">
-        <SelectValue />
-      </SelectTrigger>
-      <SelectContent>
-        {SUPPORTED_LANGUAGES.map((lang) => (
-          <SelectItem
-            key={lang.language}
-            value={lang.language}
-          >
-            {LANGUAGE_DISPLAY_NAMES[lang.language]}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-    {driverCode && (
-      <Badge variant="secondary" className="text-xs">
-        Auto-tested
-      </Badge>
-    )}
-  </div>
+          <div className="flex flex-col sm:flex-row gap-2 sm:items-center sm:justify-between">
+            <div className="flex items-center gap-2">
+              <Select
+                value={selectedLanguage.language}
+                onValueChange={handleLanguageChange}
+              >
+                <SelectTrigger className="w-36 h-8 text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {SUPPORTED_LANGUAGES.map((lang) => (
+                    <SelectItem
+                      key={lang.language}
+                      value={lang.language}
+                    >
+                      {LANGUAGE_DISPLAY_NAMES[lang.language]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {driverCode && (
+                <Badge variant="secondary" className="text-xs">
+                  Auto-tested
+                </Badge>
+              )}
+            </div>
 
-  <div className="flex gap-2">
-    <Button
-      size="sm"
-      variant="outline"
-      onClick={runCode}
-      disabled={
-        practiceState === "running" ||
-        practiceState === "reviewing"
-      }
-      className="flex-1 sm:flex-none"
-    >
-      {practiceState === "running" ? (
-        <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
-      ) : (
-        <Play className="h-3.5 w-3.5 mr-1.5" />
-      )}
-      Run
-    </Button>
-    <Button
-      size="sm"
-      onClick={submitSolution}
-      disabled={
-        practiceState === "running" ||
-        practiceState === "reviewing" ||
-        practiceState === "reviewed"
-      }
-      className="flex-1 sm:flex-none"
-    >
-      {practiceState === "reviewing" ? (
-        <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
-      ) : (
-        <BrainCircuit className="h-3.5 w-3.5 mr-1.5" />
-      )}
-      {practiceState === "reviewed"
-        ? "Reviewed"
-        : "Submit for Review"}
-    </Button>
-  </div>
-</div>
+            <div className="flex gap-2">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={runCode}
+                disabled={
+                  practiceState === "running" ||
+                  practiceState === "reviewing"
+                }
+                className="flex-1 sm:flex-none"
+              >
+                {practiceState === "running" ? (
+                  <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+                ) : (
+                  <Play className="h-3.5 w-3.5 mr-1.5" />
+                )}
+                Run
+              </Button>
+              <Button
+                size="sm"
+                onClick={submitSolution}
+                disabled={
+                  practiceState === "running" ||
+                  practiceState === "reviewing" ||
+                  practiceState === "reviewed"
+                }
+                className="flex-1 sm:flex-none"
+              >
+                {practiceState === "reviewing" ? (
+                  <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+                ) : (
+                  <BrainCircuit className="h-3.5 w-3.5 mr-1.5" />
+                )}
+                {practiceState === "reviewed"
+                  ? "Reviewed"
+                  : "Submit for Review"}
+              </Button>
+            </div>
+          </div>
 
-          {/* Monaco Editor — shows only user's function */}
           <CodeEditor
             value={userCode}
             onChange={setUserCode}
@@ -678,7 +656,6 @@ export default function PracticePage() {
             height="380px"
           />
 
-          {/* Output Panel */}
           <OutputPanel
             output={output}
             error={outputError}

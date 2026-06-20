@@ -3,6 +3,7 @@ import { generateAIResponse } from "@/lib/ai/router";
 import { buildCodingProblemPrompt } from "@/lib/ai/prompts/coding";
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { deductCredit } from "@/lib/credits/deductCredit";
 
 const schema = z.object({
   language: z.string().min(1),
@@ -22,6 +23,18 @@ export async function POST(request: Request) {
         { status: 401 }
       );
     }
+
+// Credit check — deduct before AI call
+const creditResult = await deductCredit(user.id);
+if (!creditResult.success) {
+  return NextResponse.json(
+    {
+      error: creditResult.message,
+      requiresPayment: creditResult.requiresPayment ?? false,
+    },
+    { status: 402 }
+  );
+}
 
     const body = await request.json();
     const parsed = schema.safeParse(body);

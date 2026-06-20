@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { generateAIResponse } from "@/lib/ai/router";
 import { buildResumeAnalysisPrompt } from "@/lib/ai/prompts/resume";
 import { NextResponse } from "next/server";
+import { deductCredit } from "@/lib/credits/deductCredit";
 
 export async function POST(request: Request) {
   try {
@@ -16,7 +17,19 @@ export async function POST(request: Request) {
         { error: "Unauthorized" },
         { status: 401 }
       );
-    }
+    } 
+
+// Credit check — deduct before AI call
+const creditResult = await deductCredit(user.id);
+if (!creditResult.success) {
+  return NextResponse.json(
+    {
+      error: creditResult.message,
+      requiresPayment: creditResult.requiresPayment ?? false,
+    },
+    { status: 402 }
+  );
+}
 
     // Get form data — file upload
     const formData = await request.formData();

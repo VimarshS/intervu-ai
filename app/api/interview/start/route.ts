@@ -7,6 +7,7 @@ import {
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import type { InterviewType, ExperienceLevel } from "@/types/database";
+import { deductCredit } from "@/lib/credits/deductCredit";
 
 const startSessionSchema = z.object({
   role: z.string().min(1),
@@ -41,6 +42,18 @@ export async function POST(request: Request) {
         { status: 401 }
       );
     }
+
+// Credit check — deduct before AI call
+const creditResult = await deductCredit(user.id);
+if (!creditResult.success) {
+  return NextResponse.json(
+    {
+      error: creditResult.message,
+      requiresPayment: creditResult.requiresPayment ?? false,
+    },
+    { status: 402 }
+  );
+}
 
     // Validate request body
     const body = await request.json();

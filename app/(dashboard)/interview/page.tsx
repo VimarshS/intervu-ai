@@ -35,6 +35,7 @@ import { useInterview } from "@/hooks/useInterview";
 import { useVoice } from "@/hooks/useVoice";
 import { VoiceToggle } from "@/components/interview/VoiceToggle";
 import type { InterviewType, ExperienceLevel } from "@/types/database";
+import { UpgradeModal } from "@/components/credits/UpgradeModal";
 
 const setupSchema = z.object({
   role: z.string().min(2, "Please enter a role"),
@@ -52,6 +53,7 @@ type SetupFormData = z.infer<typeof setupSchema>;
 export default function InterviewPage() {
   const [userInput, setUserInput] = useState("");
   const [isVoiceMode, setIsVoiceMode] = useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const {
@@ -129,14 +131,30 @@ export default function InterviewPage() {
     }
   }, [transcript]);
 
-  async function onStartInterview(data: SetupFormData) {
-    await startInterview({
+ async function onStartInterview(data: SetupFormData) {
+  const response = await fetch("/api/interview/start", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
       role: data.role,
       company: data.company ?? null,
-      interview_type: data.interview_type as InterviewType,
-      experience_level: data.experience_level as ExperienceLevel,
-    });
+      interview_type: data.interview_type,
+      experience_level: data.experience_level,
+    }),
+  });
+
+  if (response.status === 402) {
+    setShowUpgradeModal(true);
+    return;
   }
+
+  await startInterview({
+    role: data.role,
+    company: data.company ?? null,
+    interview_type: data.interview_type as InterviewType,
+    experience_level: data.experience_level as ExperienceLevel,
+  });
+}
 
   async function onSendMessage() {
     if (!userInput.trim()) return;
@@ -292,6 +310,11 @@ export default function InterviewPage() {
             </form>
           </CardContent>
         </Card>
+        {/* Upgrade Modal */}
+<UpgradeModal
+  isOpen={showUpgradeModal}
+  onClose={() => setShowUpgradeModal(false)}
+/>
       </div>
     );
   }

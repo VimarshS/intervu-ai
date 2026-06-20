@@ -14,6 +14,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { UpgradeModal } from "@/components/credits/UpgradeModal";
 import {
   FileText,
   Clock,
@@ -29,6 +30,7 @@ export default function ResumePage() {
   const [pastAnalyses, setPastAnalyses] = useState<ResumeAnalysis[]>([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
   useEffect(() => {
     async function fetchPastAnalyses() {
@@ -64,16 +66,18 @@ export default function ResumePage() {
   }, []);
 
   function handleAnalysisComplete(analysis: ResumeAnalysis) {
-    setCurrentAnalysis(analysis);
-    // Add to top of past analyses list
-    setPastAnalyses((prev) => [analysis, ...prev.slice(0, 4)]);
-    // Scroll to results
-    setTimeout(() => {
-      document
-        .getElementById("analysis-results")
-        ?.scrollIntoView({ behavior: "smooth" });
-    }, 100);
-  }
+  setCurrentAnalysis(analysis);
+  setPastAnalyses((prev) => [analysis, ...prev.slice(0, 4)]);
+  setTimeout(() => {
+    document
+      .getElementById("analysis-results")
+      ?.scrollIntoView({ behavior: "smooth" });
+  }, 100);
+}
+
+function handlePaymentRequired() {
+  setShowUpgradeModal(true);
+}
 
   function getAtsColor(score: number): string {
     if (score >= 85) return "text-green-500";
@@ -112,10 +116,11 @@ export default function ResumePage() {
         </CardHeader>
         <CardContent>
           <UploadZone
-            onAnalysisComplete={handleAnalysisComplete}
-            isAnalyzing={isAnalyzing}
-            setIsAnalyzing={setIsAnalyzing}
-          />
+  onAnalysisComplete={handleAnalysisComplete}
+  onPaymentRequired={handlePaymentRequired}
+  isAnalyzing={isAnalyzing}
+  setIsAnalyzing={setIsAnalyzing}
+/>
         </CardContent>
       </Card>
 
@@ -233,6 +238,11 @@ export default function ResumePage() {
           </div>
         )}
       </div>
+       {/* Upgrade Modal */}
+      <UpgradeModal
+        isOpen={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+      />
     </div>
   );
 }

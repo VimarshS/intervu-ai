@@ -22,11 +22,13 @@ import {
   Flame,
   Sparkles,
   CheckCircle2,
+  Coins,
 } from "lucide-react";
 import Link from "next/link";
 import { StatsCard } from "@/components/dashboard/StatsCard";
 import { SessionCard } from "@/components/dashboard/SessionCard";
 import { ProgressChartWrapper } from "@/components/dashboard/ProgressChartWrapper";
+import { UpgradeHandler } from "@/components/dashboard/UpgradeHandler";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -68,6 +70,16 @@ export default async function DashboardPage() {
 
   const isNewUser = totalSessions === 0;
   const isEarlyUser = totalSessions > 0 && totalSessions < 3;
+  const { data: creditsData } = await supabase
+  .from("profiles")
+  .select("free_credits, paid_credits")
+  .eq("id", user.id)
+  .single();
+
+const totalCredits =
+  (creditsData?.free_credits ?? 0) +
+  (creditsData?.paid_credits ?? 0);
+const isCreditsExhausted = totalCredits === 0;
 
   const milestoneProgress = Math.min(completedSessions.length, 3);
   const milestonePercent = Math.round((milestoneProgress / 3) * 100);
@@ -107,6 +119,38 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-6">
+      {/* ── CREDITS EXHAUSTED BANNER ─────────────────────── */}
+{isCreditsExhausted && (
+  <div className="rounded-xl border border-red-500/20 bg-red-500/5 p-5">
+    <div className="flex items-start justify-between gap-4 flex-wrap">
+      <div className="space-y-1">
+        <div className="flex items-center gap-2">
+          <Coins className="h-4 w-4 text-red-400" />
+          <p
+            className="font-semibold text-slate-100"
+            style={{ fontFamily: "var(--font-space-grotesk)" }}
+          >
+            You have used all your free credits.
+          </p>
+        </div>
+        <p className="text-sm text-slate-400 max-w-lg">
+          Upgrade to keep practicing. Your progress and
+          history are saved — pick up right where you
+          left off.
+        </p>
+      </div>
+      <Button
+        asChild
+        className="bg-indigo-600 hover:bg-indigo-500 text-white border-0 gap-2 shrink-0"
+      >
+        <Link href="/dashboard?upgrade=true">
+          Upgrade Plan
+          <ArrowRight className="h-4 w-4" />
+        </Link>
+      </Button>
+    </div>
+  </div>
+)}
 
       {/* ── FIRST-TIME USER BANNER ─────────────────────────── */}
       {isNewUser && (
@@ -428,7 +472,8 @@ export default async function DashboardPage() {
           </CardContent>
         </Card>
       )}
-
+     {/* Handles ?upgrade=true and ?payment=success params */}
+<UpgradeHandler />
     </div>
   );
 }

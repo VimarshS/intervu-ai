@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { LogOut, User, Settings } from "lucide-react";
 import Link from "next/link";
+import { CreditsDisplay } from "../credits/CreditsDisplay";
 
 export async function Navbar() {
   const supabase = await createClient();
@@ -37,17 +38,18 @@ export async function Navbar() {
 
   return (
     <header className="h-14 border-b border-slate-800 bg-slate-950/80 backdrop-blur-sm flex items-center justify-between px-6 sticky top-0 z-30">
-      {/* Left — current context hint */}
-      <div className="flex items-center gap-2">
-        {profile?.target_role && (
-          <div className="hidden sm:flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800 border border-slate-700">
-            <div className="h-1.5 w-1.5 rounded-full bg-indigo-400" />
-            <span className="text-xs text-slate-300 font-medium">
-              {profile.target_role}
-            </span>
-          </div>
-        )}
-      </div>
+     {/* Left — context + credits */}
+<div className="flex items-center gap-3">
+  {profile?.target_role && (
+    <div className="hidden sm:flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800 border border-slate-700">
+      <div className="h-1.5 w-1.5 rounded-full bg-indigo-400" />
+      <span className="text-xs text-slate-300 font-medium">
+        {profile.target_role}
+      </span>
+    </div>
+  )}
+  <CreditsDisplay />
+</div>
 
       {/* Right — user menu */}
       <DropdownMenu>
