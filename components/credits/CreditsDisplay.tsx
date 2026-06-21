@@ -1,22 +1,50 @@
-import { getCredits } from "@/lib/credits/deductCredit";
-import { createClient } from "@/lib/supabase/server";
+"use client";
+
+import { useEffect, useState } from "react";
+import { createClient } from "@/lib/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Coins, AlertTriangle } from "lucide-react";
 
-export async function CreditsDisplay() {
-  const supabase = await createClient();
+interface Credits {
+  free_credits: number;
+  paid_credits: number;
+  total: number;
+}
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+export function CreditsDisplay() {
+  const [credits, setCredits] = useState<Credits | null>(null);
 
-  if (!user) return null;
+  async function fetchCredits() {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
 
-  const credits = await getCredits(user.id);
+    const { data } = await supabase
+      .from("profiles")
+      .select("free_credits, paid_credits")
+      .eq("id", user.id)
+      .single();
+
+    if (data) {
+      setCredits({
+        free_credits: data.free_credits,
+        paid_credits: data.paid_credits,
+        total: data.free_credits + data.paid_credits,
+      });
+    }
+  }
+
+  useEffect(() => {
+    fetchCredits();
+
+    // Re-fetch every 10 seconds to catch deductions
+    const interval = setInterval(fetchCredits, 10000);
+    return () => clearInterval(interval);
+  }, []);
 
   if (!credits) return null;
 
-  const total = credits.total;
+  const { total } = credits;
   const isLow = total <= 2 && total > 0;
   const isEmpty = total === 0;
 
