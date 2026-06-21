@@ -605,3 +605,60 @@ arrays even when only one record exists.
 - Readiness score calculates from real session data ✅
 - Change password works ✅
 - Delete account confirmation works ✅
+
+## Credits + Stripe Integration
+**Date:** 2025-06-21
+
+### Built
+- Free credits system (5 credits on signup)
+- Credit deduction on interview start, resume analyze, coding problem
+- Credits badge in navbar (server component)
+- Upgrade modal with two plans (Credits Pack ₹49, Monthly ₹99)
+- Stripe Checkout integration
+- Stripe webhook handler with service role client
+- Subscriptions table for transaction records
+- Dashboard exhausted banner
+- UpgradeHandler for ?upgrade=true and ?payment=success params
+
+### Key Decisions
+- Credits deducted server-side only — never trusted from client
+- Free credits deducted first, paid credits second
+- Webhook uses Supabase service role key — bypasses RLS
+- Stripe and PRICE_IDS initialized inside POST function — guarantees env vars loaded
+- export const config removed from webhook — Pages Router pattern, not App Router
+- onPaymentRequired prop added to UploadZone for resume 402 handling
+
+### Issues Fixed
+- Price ID had l vs I character confusion — always copy-paste from Stripe
+- Webhook 404 because createClient() has no session in webhook context
+- Fixed by switching to service role client in webhook route
+- UploadZone missing onPaymentRequired in destructured props — build failed
+
+### Environment Variables Added
+- SUPABASE_SERVICE_ROLE_KEY
+- STRIPE_SECRET_KEY
+- NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+- STRIPE_WEBHOOK_SECRET
+- STRIPE_CREDITS_PRICE_ID
+- STRIPE_MONTHLY_PRICE_ID
+
+### Database Changes
+- profiles: free_credits INTEGER DEFAULT 5
+- profiles: paid_credits INTEGER DEFAULT 0
+- subscriptions table created with RLS policies
+
+### Files Created
+- lib/credits/deductCredit.ts
+- components/credits/CreditsDisplay.tsx
+- components/credits/UpgradeModal.tsx
+- components/dashboard/UpgradeHandler.tsx
+- app/api/stripe/checkout/route.ts
+- app/api/stripe/webhook/route.ts
+
+### Files Modified
+- app/api/interview/start/route.ts — credit check
+- app/api/resume/analyze/route.ts — credit check
+- app/api/coding/problem/route.ts — credit check
+- components/layout/Navbar.tsx — credits badge
+- components/resume/UploadZone.tsx — onPaymentRequired prop
+- app/(dashboard)/dashboard/page.tsx — exhausted banner
