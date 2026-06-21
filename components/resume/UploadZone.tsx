@@ -66,6 +66,7 @@ async function extractTextFromPDF(file: File): Promise<string> {
 
 export function UploadZone({
   onAnalysisComplete,
+  onPaymentRequired,
   isAnalyzing,
   setIsAnalyzing,
 }: UploadZoneProps) {
