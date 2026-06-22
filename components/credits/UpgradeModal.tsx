@@ -92,120 +92,118 @@ export function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
     }
   }
 
-  return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-slate-900 border-slate-700 w-[calc(100vw-2rem)] max-w-md mx-auto rounded-xl">
-        <DialogHeader>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg bg-indigo-500/20 flex items-center justify-center">
-                <Coins className="h-4 w-4 text-indigo-400" />
-              </div>
-              <DialogTitle
-                className="text-slate-100"
-                style={{ fontFamily: "var(--font-space-grotesk)" }}
-              >
-                Get More Credits
-              </DialogTitle>
-            </div>
+ return (
+  <Dialog open={isOpen} onOpenChange={onClose}>
+    <DialogContent className="bg-slate-900 border-slate-700 w-[calc(100vw-2rem)] max-w-md mx-auto rounded-xl max-h-[90vh] overflow-y-auto">
+      <DialogHeader>
+        <div className="flex items-center gap-2">
+          <div className="h-8 w-8 rounded-lg bg-indigo-500/20 flex items-center justify-center shrink-0">
+            <Coins className="h-4 w-4 text-indigo-400" />
           </div>
-          <DialogDescription className="text-slate-400 text-sm mt-2">
-            You have used all your free credits. Choose a plan to
-            keep practicing.
-          </DialogDescription>
-        </DialogHeader>
-
-        {/* Free credits reminder */}
-        <div className="rounded-lg bg-slate-800 border border-slate-700 p-3 flex items-center gap-3">
-          <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
-          <p className="text-xs text-slate-400">
-            You already used your{" "}
-            <span className="text-slate-200 font-medium">
-              5 free credits
-            </span>{" "}
-            — that is a great start. Keep going.
-          </p>
+          <DialogTitle
+            className="text-slate-100"
+            style={{ fontFamily: "var(--font-space-grotesk)" }}
+          >
+            Get More Credits
+          </DialogTitle>
         </div>
+        <DialogDescription className="text-slate-400 text-sm mt-2">
+          You have used all your free credits. Choose a plan to
+          keep practicing.
+        </DialogDescription>
+      </DialogHeader>
 
-        {/* Plans */}
-        <div className="grid grid-cols-1 gap-3">
-          {PLANS.map((plan) => (
-            <div
-              key={plan.id}
-              className="rounded-xl border border-slate-700 bg-slate-800/50 p-4 space-y-3 hover:border-slate-600 transition-colors"
-            >
-              <div className="flex items-start justify-between">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h3
-                      className="font-semibold text-slate-100 text-sm"
-                      style={{ fontFamily: "var(--font-space-grotesk)" }}
-                    >
-                      {plan.name}
-                    </h3>
-                    <Badge
-                      variant="outline"
-                      className={`text-xs ${plan.badgeColor}`}
-                    >
-                      {plan.badge}
-                    </Badge>
-                  </div>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    {plan.description}
-                  </p>
-                </div>
-                <div className="text-right shrink-0">
-                  <p
-                    className="text-xl font-bold text-slate-100"
+      {/* Free credits reminder */}
+      <div className="rounded-lg bg-slate-800 border border-slate-700 p-3 flex items-center gap-3">
+        <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
+        <p className="text-xs text-slate-400">
+          You already used your{" "}
+          <span className="text-slate-200 font-medium">
+            5 free credits
+          </span>{" "}
+          — that is a great start. Keep going.
+        </p>
+      </div>
+
+      {/* Plans */}
+      <div className="grid grid-cols-1 gap-3">
+        {PLANS.map((plan) => (
+          <div
+            key={plan.id}
+            className="rounded-xl border border-slate-700 bg-slate-800/50 p-4 space-y-3"
+          >
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h3
+                    className="font-semibold text-slate-100 text-sm"
                     style={{ fontFamily: "var(--font-space-grotesk)" }}
                   >
-                    {plan.price}
-                  </p>
-                  <p className="text-xs text-slate-500">
-                    {plan.credits} credits
-                  </p>
-                </div>
-              </div>
-
-              <ul className="space-y-1">
-                {plan.features.map((feature) => (
-                  <li
-                    key={feature}
-                    className="flex items-center gap-2 text-xs text-slate-400"
+                    {plan.name}
+                  </h3>
+                  <Badge
+                    variant="outline"
+                    className={`text-xs shrink-0 ${plan.badgeColor}`}
                   >
-                    <Zap className="h-3 w-3 text-indigo-400 shrink-0" />
-                    {feature}
-                  </li>
-                ))}
-              </ul>
-
-              <Button
-                className={`w-full ${plan.buttonStyle}`}
-                onClick={() => handleUpgrade(plan.priceType)}
-                disabled={loadingPlan !== null}
-              >
-                {loadingPlan === plan.priceType ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : null}
-                {loadingPlan === plan.priceType
-                  ? "Redirecting to payment..."
-                  : `Get ${plan.credits} Credits for ${plan.price}`}
-              </Button>
+                    {plan.badge}
+                  </Badge>
+                </div>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  {plan.description}
+                </p>
+              </div>
+              <div className="text-right shrink-0">
+                <p
+                  className="text-xl font-bold text-slate-100"
+                  style={{ fontFamily: "var(--font-space-grotesk)" }}
+                >
+                  {plan.price}
+                </p>
+                <p className="text-xs text-slate-500">
+                  {plan.credits} credits
+                </p>
+              </div>
             </div>
-          ))}
-        </div>
 
-        {error && (
-          <div className="rounded-lg bg-red-500/10 border border-red-500/20 p-3 flex items-center gap-2">
-            <X className="h-4 w-4 text-red-400 shrink-0" />
-            <p className="text-xs text-red-400">{error}</p>
+            <ul className="space-y-1">
+              {plan.features.map((feature) => (
+                <li
+                  key={feature}
+                  className="flex items-center gap-2 text-xs text-slate-400"
+                >
+                  <Zap className="h-3 w-3 text-indigo-400 shrink-0" />
+                  {feature}
+                </li>
+              ))}
+            </ul>
+
+            <Button
+              className={`w-full ${plan.buttonStyle}`}
+              onClick={() => handleUpgrade(plan.priceType)}
+              disabled={loadingPlan !== null}
+            >
+              {loadingPlan === plan.priceType ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : null}
+              {loadingPlan === plan.priceType
+                ? "Redirecting to payment..."
+                : `Get ${plan.credits} Credits for ${plan.price}`}
+            </Button>
           </div>
-        )}
+        ))}
+      </div>
 
-        <p className="text-xs text-slate-600 text-center">
-          Secure payment via Stripe · Cancel anytime
-        </p>
-      </DialogContent>
-    </Dialog>
-  );
+      {error && (
+        <div className="rounded-lg bg-red-500/10 border border-red-500/20 p-3 flex items-center gap-2">
+          <X className="h-4 w-4 text-red-400 shrink-0" />
+          <p className="text-xs text-red-400">{error}</p>
+        </div>
+      )}
+
+      <p className="text-xs text-slate-600 text-center pb-1">
+        Secure payment via Stripe · Cancel anytime
+      </p>
+    </DialogContent>
+  </Dialog>
+);
 }

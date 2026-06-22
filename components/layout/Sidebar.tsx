@@ -18,6 +18,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { signOut } from "@/app/(auth)/login/actions";
+import { CreditsDisplay } from "@/components/credits/CreditsDisplay";
 
 const navItems = [
   {
@@ -126,31 +127,35 @@ export function Sidebar() {
       </aside>
 
       {/* Mobile Header */}
-      <div className="md:hidden fixed top-0 left-0 right-0 z-50 h-14 bg-slate-950 border-b border-slate-800 flex items-center justify-between px-4">
-        <div className="flex items-center space-x-2">
-          <div className="h-7 w-7 rounded-lg bg-indigo-500/20 flex items-center justify-center">
-            <BrainCircuit className="h-4 w-4 text-indigo-400" />
-          </div>
-          <span
-            className="font-semibold text-slate-100"
-            style={{ fontFamily: "var(--font-space-grotesk)" }}
-          >
-            Intervu AI
-          </span>
-        </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setMobileOpen(!mobileOpen)}
-          className="h-9 w-9 text-slate-400 hover:text-slate-200 hover:bg-slate-800"
-        >
-          {mobileOpen ? (
-            <X className="h-5 w-5" />
-          ) : (
-            <Menu className="h-5 w-5" />
-          )}
-        </Button>
-      </div>
+<div className="md:hidden fixed top-0 left-0 right-0 z-50 h-14 bg-slate-950 border-b border-slate-800 flex items-center justify-between px-4">
+  <div className="flex items-center space-x-2">
+    <div className="h-7 w-7 rounded-lg bg-indigo-500/20 flex items-center justify-center">
+      <BrainCircuit className="h-4 w-4 text-indigo-400" />
+    </div>
+    <span
+      className="font-semibold text-slate-100"
+      style={{ fontFamily: "var(--font-space-grotesk)" }}
+    >
+      Intervu AI
+    </span>
+  </div>
+  {/* Credits badge on mobile header */}
+  <div className="flex items-center gap-2">
+    <CreditsDisplay />
+    <Button
+      variant="ghost"
+      size="icon"
+      onClick={() => setMobileOpen(!mobileOpen)}
+      className="h-9 w-9 text-slate-400 hover:text-slate-200 hover:bg-slate-800"
+    >
+      {mobileOpen ? (
+        <X className="h-5 w-5" />
+      ) : (
+        <Menu className="h-5 w-5" />
+      )}
+    </Button>
+  </div>
+</div>
 
       {/* Mobile Overlay */}
       {mobileOpen && (
