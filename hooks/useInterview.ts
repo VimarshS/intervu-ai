@@ -33,39 +33,43 @@ export function useInterview() {
   }, []);
 
   const startInterview = useCallback(
-    async (config: InterviewConfig) => {
-      store.setConfig(config);
+  async (config: InterviewConfig) => {
+    store.setConfig(config);
 
-      try {
-        const response = await fetch("/api/interview/start", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(config),
-        });
+    try {
+      const response = await fetch("/api/interview/start", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(config),
+      });
 
-        const result = await response.json();
+      const result = await response.json();
 
-        if (!response.ok) {
-          toast.error(result.error ?? "Failed to start interview");
-          return false;
-        }
-
-        store.setSessionId(result.session_id);
-        store.setSystemPrompt(result.system_prompt);
-        store.setMessages([
-          { role: "assistant", content: result.message },
-        ]);
-        store.setStartTime(new Date());
-        store.setInterviewState("active");
-        return true;
-      } catch {
-        toast.error("Failed to connect. Please try again.");
-        return false;
+      // Return 402 so the page can show upgrade modal
+      if (response.status === 402) {
+        return { requiresPayment: true };
       }
-    },
-    [store]
-  );
 
+      if (!response.ok) {
+        toast.error(result.error ?? "Failed to start interview");
+        return { success: false };
+      }
+
+      store.setSessionId(result.session_id);
+      store.setSystemPrompt(result.system_prompt);
+      store.setMessages([
+        { role: "assistant", content: result.message },
+      ]);
+      store.setStartTime(new Date());
+      store.setInterviewState("active");
+      return { success: true };
+    } catch {
+      toast.error("Failed to connect. Please try again.");
+      return { success: false };
+    }
+  },
+  [store]
+);
   const sendMessage = useCallback(
     async (userInput: string) => {
       const trimmed = userInput.trim();
@@ -92,9 +96,23 @@ export function useInterview() {
         const result = await response.json();
 
         if (!response.ok) {
-          toast.error(result.error ?? "Failed to get response");
-          return false;
-        }
+  const errorMessage = result.error ?? "Failed to get response";
+
+  // Session no longer exists — reset to idle so user can start fresh
+  if (
+    response.status === 404 ||
+    errorMessage.toLowerCase().includes("session") ||
+    errorMessage.toLowerCase().includes("no longer") ||
+    errorMessage.toLowerCase().includes("not found")
+  ) {
+    toast.error("Interview session ended. Please start a new interview.");
+    store.resetSession();
+    return false;
+  }
+
+  toast.error(errorMessage);
+  return false;
+}
 
         store.addMessage({
           role: "assistant",
@@ -115,6 +133,14 @@ export function useInterview() {
   const endInterview = useCallback(async () => {
     if (!store.sessionId) return false;
 
+   // If no user messages sent — only the AI greeting exists
+// Skip feedback API and reset immediately
+const userMessages = store.messages.filter((m) => m.role === "user");
+if (userMessages.length === 0) {
+  store.resetSession();
+  return true;
+}
+
     store.setInterviewState("ending");
 
     try {
@@ -129,11 +155,23 @@ export function useInterview() {
 
       const result = await response.json();
 
-      if (!response.ok) {
-        toast.error(result.error ?? "Failed to generate feedback");
-        store.setInterviewState("active");
-        return false;
-      }
+     if (!response.ok) {
+  const errorMessage = result.error ?? "Failed to generate feedback";
+
+  if (
+    response.status === 404 ||
+    errorMessage.toLowerCase().includes("session") ||
+    errorMessage.toLowerCase().includes("no longer")
+  ) {
+    toast.error("Session expired. Redirecting to start page.");
+    store.resetSession();
+    return false;
+  }
+
+  toast.error(errorMessage);
+  store.setInterviewState("active");
+  return false;
+}
 
       store.setFeedback(result.feedback);
       store.setInterviewState("feedback");

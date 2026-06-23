@@ -131,29 +131,17 @@ export default function InterviewPage() {
     }
   }, [transcript]);
 
- async function onStartInterview(data: SetupFormData) {
-  const response = await fetch("/api/interview/start", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      role: data.role,
-      company: data.company ?? null,
-      interview_type: data.interview_type,
-      experience_level: data.experience_level,
-    }),
-  });
-
-  if (response.status === 402) {
-    setShowUpgradeModal(true);
-    return;
-  }
-
-  await startInterview({
+async function onStartInterview(data: SetupFormData) {
+  const result = await startInterview({
     role: data.role,
     company: data.company ?? null,
     interview_type: data.interview_type as InterviewType,
     experience_level: data.experience_level as ExperienceLevel,
   });
+
+  if (result?.requiresPayment) {
+    setShowUpgradeModal(true);
+  }
 }
 
   async function onSendMessage() {
