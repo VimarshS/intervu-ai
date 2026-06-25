@@ -20,6 +20,13 @@ import {
 } from "@/components/ui/card";
 import { loginWithEmail, loginWithGoogle } from "./actions";
 import { Loader2, BrainCircuit } from "lucide-react";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Sign In",
+  description: "Sign in to Intervu AI and continue your interview preparation.",
+  robots: { index: true, follow: true },
+};
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),

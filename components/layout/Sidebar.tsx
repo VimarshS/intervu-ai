@@ -58,7 +58,7 @@ export function Sidebar() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const NavLinks = () => (
-    <nav className="flex-1 space-y-0.5">
+   <nav className="flex-1 space-y-0.5" aria-label="Main navigation"> 
       {navItems.map((item) => {
         const isActive =
           pathname === item.href ||
@@ -115,15 +115,14 @@ export function Sidebar() {
         {/* Navigation */}
         <NavLinks />
 
-        {/* Footer */}
         <div className="mt-auto px-3 py-2 rounded-lg bg-slate-900 border border-slate-800">
-          <p className="text-xs font-medium text-slate-400">
-            Intervu AI
-          </p>
-          <p className="text-xs text-slate-600 mt-0.5">
-            Final Year Project
-          </p>
-        </div>
+  <p className="text-xs font-medium text-slate-400">
+    Intervu AI
+  </p>
+  <p className="text-xs text-slate-600 mt-0.5">
+    Made for placement season
+  </p>
+</div>
       </aside>
 
       {/* Mobile Header */}
@@ -143,11 +142,14 @@ export function Sidebar() {
   <div className="flex items-center gap-2">
     <CreditsDisplay />
     <Button
-      variant="ghost"
-      size="icon"
-      onClick={() => setMobileOpen(!mobileOpen)}
-      className="h-9 w-9 text-slate-400 hover:text-slate-200 hover:bg-slate-800"
-    >
+  variant="ghost"
+  size="icon"
+  onClick={() => setMobileOpen(!mobileOpen)}
+  className="h-9 w-9 text-slate-400 hover:text-slate-200 hover:bg-slate-800"
+  aria-label={mobileOpen ? "Close navigation menu" : "Open navigation menu"}
+  aria-expanded={mobileOpen}
+  aria-controls="mobile-nav"
+>
       {mobileOpen ? (
         <X className="h-5 w-5" />
       ) : (
@@ -167,6 +169,9 @@ export function Sidebar() {
 
       {/* Mobile Drawer */}
 <div
+  id="mobile-nav"
+  role="navigation"
+  aria-label="Mobile navigation"
   className={cn(
     "md:hidden fixed top-14 left-0 bottom-0 z-40 w-64 bg-slate-950 border-r border-slate-800 px-3 py-4 flex flex-col transition-transform duration-200",
     mobileOpen ? "translate-x-0" : "-translate-x-full"

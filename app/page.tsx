@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import type { Metadata } from "next";
 import {
   BrainCircuit,
   MessageSquare,
@@ -12,6 +13,22 @@ import {
   CheckCircle2,
   ChevronRight,
 } from "lucide-react";
+
+export const metadata: Metadata = {
+  title: "Intervu AI — AI-Powered Interview Practice Platform",
+  description:
+    "Practice mock interviews until you stop being nervous. Get AI feedback, analyze your resume, solve coding problems, and track your progress. Free for placement season.",
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    title: "Intervu AI — AI-Powered Interview Practice Platform",
+    description:
+      "Practice mock interviews until you stop being nervous. Free AI feedback for placement season.",
+    url: "/",
+    type: "website",
+  },
+};
 
 const steps = [
   {
@@ -87,23 +104,34 @@ const personas = [
     situation: "Placement season is in 3 weeks",
     description:
       "You have done the theory but never practiced answering out loud under pressure. Start with a behavioral interview today — it takes 10 minutes.",
-    cta: "Start a behavioral interview →",
+    cta: "Start a behavioral interview",
     href: "/signup",
   },
   {
     situation: "You applied to 20 companies and heard nothing back",
     description:
       "Upload your resume and find out what is missing before you apply to the next 20. Get an ATS score and predicted interview questions.",
-    cta: "Analyze your resume →",
+    cta: "Analyze your resume",
     href: "/signup",
   },
   {
     situation: "You freeze in technical rounds",
     description:
       "Practice coding problems with an AI that asks you to explain your approach — just like a real interviewer. Get feedback on your logic, not just your code.",
-    cta: "Practice a coding round →",
+    cta: "Practice a coding round",
     href: "/signup",
   },
+];
+
+const differentiators = [
+  "AI asks follow-up questions — not just a question bank",
+  "Feedback on communication, not just correctness",
+  "Resume analysis that predicts your interview questions",
+  "Voice mode with filler word detection",
+  "Company-specific question style (Google, Amazon, etc.)",
+  "Coding review that explains what you missed, not just pass/fail",
+  "Every session scored across 4 dimensions",
+  "Works at 2am before a 9am interview",
 ];
 
 export default function LandingPage() {
@@ -111,44 +139,56 @@ export default function LandingPage() {
     <div className="min-h-screen bg-slate-950 text-slate-100">
 
       {/* Nav */}
-      <nav className="border-b border-slate-800 bg-slate-950/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="max-w-5xl mx-auto px-6 h-14 flex items-center justify-between">
-          <div className="flex items-center space-x-2.5">
-            <div className="h-8 w-8 rounded-lg bg-indigo-500/20 flex items-center justify-center">
-              <BrainCircuit className="h-4 w-4 text-indigo-400" />
+      <header>
+        <nav
+          className="border-b border-slate-800 bg-slate-950/80 backdrop-blur-sm sticky top-0 z-50"
+          aria-label="Main navigation"
+        >
+          <div className="max-w-5xl mx-auto px-6 h-14 flex items-center justify-between">
+            <Link
+              href="/"
+              className="flex items-center space-x-2.5"
+              aria-label="Intervu AI home"
+            >
+              <div
+                className="h-8 w-8 rounded-lg bg-indigo-500/20 flex items-center justify-center"
+                aria-hidden="true"
+              >
+                <BrainCircuit className="h-4 w-4 text-indigo-400" aria-hidden="true" />
+              </div>
+              <span
+                className="text-base font-semibold text-slate-100"
+                style={{ fontFamily: "var(--font-space-grotesk)" }}
+              >
+                Intervu AI
+              </span>
+            </Link>
+            <div className="flex items-center gap-2">
+              <Button
+                asChild
+                variant="ghost"
+                size="sm"
+                className="text-slate-400 hover:text-slate-200 hover:bg-slate-800"
+              >
+                <Link href="/login">Sign In</Link>
+              </Button>
+              <Button
+                asChild
+                size="sm"
+                className="bg-indigo-600 hover:bg-indigo-500 text-white border-0"
+              >
+                <Link href="/signup">Start Free</Link>
+              </Button>
             </div>
-            <span
-              className="text-base font-semibold text-slate-100"
-              style={{ fontFamily: "var(--font-space-grotesk)" }}
-            >
-              Intervu AI
-            </span>
           </div>
-          <div className="flex items-center gap-2">
-            <Button
-              asChild
-              variant="ghost"
-              size="sm"
-              className="text-slate-400 hover:text-slate-200 hover:bg-slate-800"
-            >
-              <Link href="/login">Sign In</Link>
-            </Button>
-            <Button
-              asChild
-              size="sm"
-              className="bg-indigo-600 hover:bg-indigo-500 text-white border-0"
-            >
-              <Link href="/signup">Start Free</Link>
-            </Button>
-          </div>
-        </div>
-      </nav>
+        </nav>
+      </header>
 
       {/* Hero */}
-      <section className="max-w-5xl mx-auto px-6 pt-20 pb-16 text-center">
+      <section aria-labelledby="hero-heading" className="max-w-5xl mx-auto px-6 pt-20 pb-16 text-center">
         <div className="relative space-y-6">
-          {/* Glow */}
-          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {/* Glow — decorative */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[250px] bg-indigo-500/5 rounded-full blur-3xl" />
           </div>
 
@@ -160,6 +200,7 @@ export default function LandingPage() {
           </Badge>
 
           <h1
+            id="hero-heading"
             className="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-50 leading-tight tracking-tight"
             style={{ fontFamily: "var(--font-space-grotesk)" }}
           >
@@ -182,9 +223,9 @@ export default function LandingPage() {
               size="lg"
               className="bg-indigo-600 hover:bg-indigo-500 text-white border-0 gap-2 h-12 px-8 text-base w-full sm:w-auto"
             >
-              <Link href="/signup">
+              <Link href="/signup" aria-label="Create a free account and practice your first interview">
                 Practice Your First Interview Free
-                <ArrowRight className="h-4 w-4" />
+                <ArrowRight className="h-4 w-4" aria-hidden="true" />
               </Link>
             </Button>
             <Button
@@ -203,29 +244,30 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* How It Works — moved up */}
-      <section className="border-y border-slate-800 bg-slate-900/30">
+      {/* How It Works */}
+      <section aria-labelledby="how-it-works-heading" className="border-y border-slate-800 bg-slate-900/30">
         <div className="max-w-5xl mx-auto px-6 py-16 space-y-10">
           <div className="text-center space-y-2">
             <h2
+              id="how-it-works-heading"
               className="text-2xl font-bold text-slate-50"
               style={{ fontFamily: "var(--font-space-grotesk)" }}
             >
               How it works
             </h2>
             <p className="text-slate-500 text-sm">
-              From signup to your first feedback report in under 15
-              minutes
+              From signup to your first feedback report in under 15 minutes
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <ol className="grid grid-cols-1 sm:grid-cols-3 gap-4 list-none">
             {steps.map((step, index) => (
-              <div key={step.step} className="relative">
+              <li key={step.step} className="relative">
                 <div className="rounded-xl border border-slate-800 bg-slate-900 p-5 space-y-3 h-full">
                   <span
                     className="text-4xl font-bold text-indigo-500/20"
                     style={{ fontFamily: "var(--font-space-grotesk)" }}
+                    aria-hidden="true"
                   >
                     {step.step}
                   </span>
@@ -240,20 +282,24 @@ export default function LandingPage() {
                   </p>
                 </div>
                 {index < steps.length - 1 && (
-                  <div className="hidden sm:flex absolute top-1/2 -right-2.5 z-10 items-center justify-center">
+                  <div
+                    className="hidden sm:flex absolute top-1/2 -right-2.5 z-10 items-center justify-center"
+                    aria-hidden="true"
+                  >
                     <ChevronRight className="h-4 w-4 text-slate-600" />
                   </div>
                 )}
-              </div>
+              </li>
             ))}
-          </div>
+          </ol>
         </div>
       </section>
 
-      {/* Who It's For — new section */}
-      <section className="max-w-5xl mx-auto px-6 py-16 space-y-10">
+      {/* Who It's For */}
+      <section aria-labelledby="personas-heading" className="max-w-5xl mx-auto px-6 py-16 space-y-10">
         <div className="text-center space-y-2">
           <h2
+            id="personas-heading"
             className="text-2xl font-bold text-slate-50"
             style={{ fontFamily: "var(--font-space-grotesk)" }}
           >
@@ -266,7 +312,7 @@ export default function LandingPage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {personas.map((persona) => (
-            <div
+            <article
               key={persona.situation}
               className="rounded-xl border border-slate-800 bg-slate-900 p-5 space-y-3 hover:border-indigo-500/30 transition-colors"
             >
@@ -281,21 +327,23 @@ export default function LandingPage() {
               </p>
               <Link
                 href={persona.href}
-                className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors flex items-center gap-1"
+                className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors flex items-center gap-1 group"
+                aria-label={`${persona.cta} — create a free account`}
               >
                 {persona.cta}
-                <ArrowRight className="h-3 w-3" />
+                <ArrowRight className="h-3 w-3 group-hover:translate-x-0.5 transition-transform" aria-hidden="true" />
               </Link>
-            </div>
+            </article>
           ))}
         </div>
       </section>
 
       {/* Features */}
-      <section className="border-t border-slate-800 bg-slate-900/20">
+      <section aria-labelledby="features-heading" className="border-t border-slate-800 bg-slate-900/20">
         <div className="max-w-5xl mx-auto px-6 py-16 space-y-10">
           <div className="text-center space-y-2">
             <h2
+              id="features-heading"
               className="text-2xl font-bold text-slate-50"
               style={{ fontFamily: "var(--font-space-grotesk)" }}
             >
@@ -310,14 +358,15 @@ export default function LandingPage() {
             {features.map((feature) => {
               const Icon = feature.icon;
               return (
-                <div
+                <article
                   key={feature.title}
                   className={`rounded-xl border ${feature.border} bg-slate-900 p-5 space-y-3 hover:bg-slate-800/80 transition-colors`}
                 >
                   <div
                     className={`h-9 w-9 rounded-lg ${feature.bg} flex items-center justify-center`}
+                    aria-hidden="true"
                   >
-                    <Icon className={`h-4 w-4 ${feature.color}`} />
+                    <Icon className={`h-4 w-4 ${feature.color}`} aria-hidden="true" />
                   </div>
                   <h3
                     className="font-semibold text-slate-100 text-sm leading-snug"
@@ -328,17 +377,17 @@ export default function LandingPage() {
                   <p className="text-sm text-slate-400 leading-relaxed">
                     {feature.description}
                   </p>
-                </div>
+                </article>
               );
             })}
           </div>
         </div>
       </section>
 
-      {/* Simple trust row */}
-      <section className="border-y border-slate-800">
+      {/* Trust row */}
+      <section aria-label="Platform statistics" className="border-y border-slate-800">
         <div className="max-w-5xl mx-auto px-6 py-8">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
+          <dl className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
             {[
               { value: "5", label: "Interview types" },
               { value: "60+", label: "Languages supported" },
@@ -346,55 +395,49 @@ export default function LandingPage() {
               { value: "Free", label: "No credit card" },
             ].map((item) => (
               <div key={item.label} className="space-y-1">
-                <p
+                <dt className="sr-only">{item.label}</dt>
+                <dd
                   className="text-2xl font-bold text-indigo-400"
                   style={{ fontFamily: "var(--font-space-grotesk)" }}
                 >
                   {item.value}
-                </p>
-                <p className="text-xs text-slate-500">{item.label}</p>
+                </dd>
+                <p className="text-xs text-slate-500" aria-hidden="true">{item.label}</p>
               </div>
             ))}
-          </div>
+          </dl>
         </div>
       </section>
 
-      {/* What you get */}
-      <section className="max-w-5xl mx-auto px-6 py-16 space-y-8">
+      {/* What makes this different */}
+      <section aria-labelledby="differentiators-heading" className="max-w-5xl mx-auto px-6 py-16 space-y-8">
         <div className="text-center space-y-2">
           <h2
+            id="differentiators-heading"
             className="text-2xl font-bold text-slate-50"
             style={{ fontFamily: "var(--font-space-grotesk)" }}
           >
             What makes this different
           </h2>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-2xl mx-auto">
-          {[
-            "AI asks follow-up questions — not just a question bank",
-            "Feedback on communication, not just correctness",
-            "Resume analysis that predicts your interview questions",
-            "Voice mode with filler word detection",
-            "Company-specific question style (Google, Amazon, etc.)",
-            "Coding review that explains what you missed, not just pass/fail",
-            "Every session scored across 4 dimensions",
-            "Works at 2am before a 9am interview",
-          ].map((point) => (
-            <div
+        <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-2xl mx-auto list-none">
+          {differentiators.map((point) => (
+            <li
               key={point}
               className="flex items-start gap-3 p-3 rounded-lg hover:bg-slate-900 transition-colors"
             >
-              <CheckCircle2 className="h-4 w-4 text-indigo-400 shrink-0 mt-0.5" />
+              <CheckCircle2 className="h-4 w-4 text-indigo-400 shrink-0 mt-0.5" aria-hidden="true" />
               <p className="text-sm text-slate-300">{point}</p>
-            </div>
+            </li>
           ))}
-        </div>
+        </ul>
       </section>
 
       {/* Final CTA */}
-      <section className="border-t border-slate-800">
+      <section aria-labelledby="cta-heading" className="border-t border-slate-800">
         <div className="max-w-5xl mx-auto px-6 py-20 text-center space-y-6">
           <h2
+            id="cta-heading"
             className="text-3xl font-bold text-slate-50"
             style={{ fontFamily: "var(--font-space-grotesk)" }}
           >
@@ -405,17 +448,16 @@ export default function LandingPage() {
             </span>
           </h2>
           <p className="text-slate-400 max-w-md mx-auto">
-            Free to use. No setup. Your first feedback report in
-            under 15 minutes.
+            Free to use. No setup. Your first feedback report in under 15 minutes.
           </p>
           <Button
             asChild
             size="lg"
             className="bg-indigo-600 hover:bg-indigo-500 text-white border-0 gap-2 h-12 px-8 text-base"
           >
-            <Link href="/signup">
+            <Link href="/signup" aria-label="Create a free account and start practicing interviews">
               Practice Your First Interview Free
-              <ArrowRight className="h-4 w-4" />
+              <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </Link>
           </Button>
         </div>
@@ -425,8 +467,11 @@ export default function LandingPage() {
       <footer className="border-t border-slate-800 bg-slate-950">
         <div className="max-w-5xl mx-auto px-6 py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center space-x-2">
-            <div className="h-6 w-6 rounded bg-indigo-500/20 flex items-center justify-center">
-              <BrainCircuit className="h-3.5 w-3.5 text-indigo-400" />
+            <div
+              className="h-6 w-6 rounded bg-indigo-500/20 flex items-center justify-center"
+              aria-hidden="true"
+            >
+              <BrainCircuit className="h-3.5 w-3.5 text-indigo-400" aria-hidden="true" />
             </div>
             <span className="text-sm font-medium text-slate-400">
               Intervu AI
@@ -435,14 +480,22 @@ export default function LandingPage() {
           <p className="text-xs text-slate-600 text-center">
             Made for placement season · 2025
           </p>
-          <div className="flex items-center gap-4 text-xs text-slate-500">
-            <Link href="/login" className="hover:text-slate-300 transition-colors">
-              Sign In
-            </Link>
-            <Link href="/signup" className="hover:text-slate-300 transition-colors">
-              Sign Up Free
-            </Link>
-          </div>
+          <nav aria-label="Footer navigation">
+            <div className="flex items-center gap-4 text-xs text-slate-500">
+              <Link
+                href="/login"
+                className="hover:text-slate-300 transition-colors"
+              >
+                Sign In
+              </Link>
+              <Link
+                href="/signup"
+                className="hover:text-slate-300 transition-colors"
+              >
+                Sign Up Free
+              </Link>
+            </div>
+          </nav>
         </div>
       </footer>
 
