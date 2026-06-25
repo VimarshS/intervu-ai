@@ -19,14 +19,6 @@ import {
 } from "@/components/ui/card";
 import { signUpWithEmail, loginWithGoogle } from "../login/actions";
 import { Loader2, BrainCircuit } from "lucide-react";
-import type { Metadata } from "next";
-
-export const metadata: Metadata = {
-  title: "Sign Up Free",
-  description:
-    "Create your free Intervu AI account. Practice mock interviews, analyze your resume, and prepare for placement season.",
-  robots: { index: true, follow: true },
-};
 
 const signupSchema = z
   .object({
