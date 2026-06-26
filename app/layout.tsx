@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     template: "%s — Intervu AI",
   },
   description:
-    "Practice mock interviews with AI. Get instant feedback, analyze your resume, solve coding problems, and track your progress. Free for placement season.",
+  "Practice mock interviews with AI. Get instant feedback, analyze your resume, and track your progress. Free for placement season.",
   keywords: [
     "mock interview",
     "interview practice",
@@ -47,20 +47,20 @@ export const metadata: Metadata = {
     description:
       "Practice mock interviews until you stop being nervous. AI feedback, resume analysis, coding practice — all free.",
     images: [
-      {
-        url: `/og-image.png`,
-        width: 1200,
-        height: 630,
-        alt: "Intervu AI — AI-Powered Interview Practice Platform",
-      },
-    ],
+  {
+    url: `${siteUrl}/og-image.png`,
+    width: 1200,
+    height: 630,
+    alt: "Intervu AI — AI-Powered Interview Practice Platform",
+  },
+],
   },
   twitter: {
     card: "summary_large_image",
     title: "Intervu AI — AI-Powered Interview Practice Platform",
     description:
       "Practice mock interviews until you stop being nervous. Free AI feedback for placement season.",
-    images: [`/og-image.png`],
+    images: [`${siteUrl}/og-image.png`],
   },
   robots: {
     index: true,
