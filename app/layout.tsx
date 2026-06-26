@@ -15,16 +15,19 @@ const spaceGrotesk = Space_Grotesk({
   display: "swap",
 });
 
-const siteUrl = "https://intervu-ai-weld.vercel.app";
+const SITE_URL = "https://intervu-ai-weld.vercel.app";
+const OG_IMAGE = "https://intervu-ai-weld.vercel.app/og-image.png";
+const TITLE = "Intervu AI — AI-Powered Interview Practice Platform";
+const DESCRIPTION = "Practice mock interviews until you stop being nervous. Free AI feedback for placement season.";
 
 export const metadata: Metadata = {
-  metadataBase: new URL(siteUrl),
+  metadataBase: new URL(SITE_URL),
   title: {
-    default: "Intervu AI — AI-Powered Interview Practice Platform",
+    default: TITLE,
     template: "%s — Intervu AI",
   },
   description:
-  "Practice mock interviews with AI. Get instant feedback, analyze your resume, and track your progress. Free for placement season.",
+    "Practice mock interviews with AI. Get instant feedback, analyze your resume, and track your progress. Free for placement season.",
   keywords: [
     "mock interview",
     "interview practice",
@@ -41,28 +44,26 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_IN",
-    url: siteUrl,
+    url: SITE_URL,
     siteName: "Intervu AI",
-    title: "Intervu AI — AI-Powered Interview Practice Platform",
-    description:
-      "Practice mock interviews until you stop being nervous. AI feedback, resume analysis, coding practice — all free.",
+    title: TITLE,
+    description: DESCRIPTION,
     images: [
-  {
-    url: "https://intervu-ai-weld.vercel.app/og-image.png",
-    secureUrl: "https://intervu-ai-weld.vercel.app/og-image.png",
-    width: 1200,
-    height: 630,
-    type: "image/png",
-    alt: "Intervu AI — AI-Powered Interview Practice Platform",
-  },
-],
+      {
+        url: OG_IMAGE,
+        secureUrl: OG_IMAGE,
+        width: 1200,
+        height: 630,
+        type: "image/png",
+        alt: TITLE,
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Intervu AI — AI-Powered Interview Practice Platform",
-    description:
-      "Practice mock interviews until you stop being nervous. Free AI feedback for placement season.",
-    images: ["https://intervu-ai-weld.vercel.app/og-image.png"],
+    title: TITLE,
+    description: DESCRIPTION,
+    images: [OG_IMAGE],
   },
   robots: {
     index: true,
@@ -81,7 +82,7 @@ export const metadata: Metadata = {
   },
   manifest: "/manifest.json",
   alternates: {
-    canonical: siteUrl,
+    canonical: SITE_URL,
   },
   verification: {
     google: "UjoHSgU_JBm3Ld28_xmQLXLQi1H3PADnh6Oz3V1SiP8",
@@ -99,6 +100,24 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`${inter.variable} ${spaceGrotesk.variable}`}
     >
+      <head>
+        {/* Explicit OG tags for WhatsApp and other scrapers */}
+        <meta property="og:image" content={OG_IMAGE} />
+        <meta property="og:image:secure_url" content={OG_IMAGE} />
+        <meta property="og:image:type" content="image/png" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:image:alt" content={TITLE} />
+        <meta property="og:site_name" content="Intervu AI" />
+        <meta property="og:title" content={TITLE} />
+        <meta property="og:description" content={DESCRIPTION} />
+        <meta property="og:url" content={SITE_URL} />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:image" content={OG_IMAGE} />
+        <meta name="twitter:title" content={TITLE} />
+        <meta name="twitter:description" content={DESCRIPTION} />
+      </head>
       <body className="min-h-screen bg-background text-foreground antialiased font-sans">
         {children}
         <Toaster richColors position="top-right" />
