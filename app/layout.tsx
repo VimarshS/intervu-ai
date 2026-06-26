@@ -48,9 +48,11 @@ export const metadata: Metadata = {
       "Practice mock interviews until you stop being nervous. AI feedback, resume analysis, coding practice — all free.",
     images: [
   {
-    url: `${siteUrl}/og-image.png`,
+    url: "https://intervu-ai-weld.vercel.app/og-image.png",
+    secureUrl: "https://intervu-ai-weld.vercel.app/og-image.png",
     width: 1200,
     height: 630,
+    type: "image/png",
     alt: "Intervu AI — AI-Powered Interview Practice Platform",
   },
 ],
@@ -60,7 +62,7 @@ export const metadata: Metadata = {
     title: "Intervu AI — AI-Powered Interview Practice Platform",
     description:
       "Practice mock interviews until you stop being nervous. Free AI feedback for placement season.",
-    images: [`${siteUrl}/og-image.png`],
+    images: ["https://intervu-ai-weld.vercel.app/og-image.png"],
   },
   robots: {
     index: true,
