@@ -15,7 +15,7 @@ const spaceGrotesk = Space_Grotesk({
   display: "swap",
 });
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://intervu-ai-weld.vercel.app";
+const siteUrl = "https://intervu-ai-weld.vercel.app";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
